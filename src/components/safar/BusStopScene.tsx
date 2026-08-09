@@ -1,6 +1,7 @@
 import { useState } from "react";
 import busStop from "@/assets/bus-stop.jpg";
 import { BoardBusButton } from "./BoardBusButton";
+import { CoverStage } from "./CoverStage";
 
 export function BusStopScene({
   onBoard,
@@ -13,9 +14,11 @@ export function BusStopScene({
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0 origin-[72%_62%] transition-transform duration-[1400ms] ease-[cubic-bezier(0.7,0,0.3,1)]"
-        style={{ transform: leaving ? "scale(3.4)" : hovering ? "scale(1.045)" : "scale(1.02)" }}
+      <CoverStage
+        className="origin-[71%_60%] transition-transform duration-[1400ms] ease-[cubic-bezier(0.7,0,0.3,1)]"
+        style={{
+          transform: `translate(-50%, -50%) scale(${leaving ? 3.4 : hovering ? 1.045 : 1.02})`,
+        }}
       >
         <img
           src={busStop}
@@ -38,7 +41,7 @@ export function BusStopScene({
             style={{ transform: leaving ? "translateX(105%)" : hovering ? "translateX(55%)" : "translateX(0)" }}
           />
         </div>
-      </div>
+      </CoverStage>
 
       {/* warm afternoon light + dust */}
       <div

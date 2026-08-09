@@ -19,7 +19,6 @@ export function CoverStage({
       style={{
         width: "max(100vw, 176.5dvh)",
         aspectRatio: "1920 / 1088",
-        minHeight: "100dvh",
         ...style,
       }}
     >
