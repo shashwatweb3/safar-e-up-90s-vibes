@@ -1,0 +1,14 @@
+{
+  "name": "सफ़र-ए-UP — एक सफ़र, कुछ पुराने गाने",
+  "short_name": "सफ़र-ए-UP",
+  "description": "An interactive UP bus-stop journey: board an old roadways bus, take the window seat, and play 90s Hindi nostalgia.",
+  "lang": "hi",
+  "start_url": "/",
+  "display": "minimal-ui",
+  "background_color": "#2b1d12",
+  "theme_color": "#7c2d1e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

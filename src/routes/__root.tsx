@@ -85,8 +85,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "एक सफ़र, कुछ पुराने गाने। An illustrated Uttar Pradesh bus journey.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://safar-e-up.vercel.app/" },
+      {
+        property: "og:image",
+        content: "https://safar-e-up.vercel.app/og-image.jpg",
+      },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/jpeg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Shashwat_web3" },
+      {
+        name: "twitter:title",
+        content: "सफ़र-ए-UP — एक सफ़र, कुछ पुराने गाने",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "An interactive UP bus-stop journey: board an old roadways bus, take the window seat, and play 90s Hindi nostalgia.",
+      },
+      { name: "twitter:image", content: "https://safar-e-up.vercel.app/og-image.jpg" },
+      { name: "theme-color", content: "#2b1d12" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -100,6 +119,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
