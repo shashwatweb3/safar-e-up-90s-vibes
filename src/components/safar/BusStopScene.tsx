@@ -85,6 +85,17 @@ export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leavin
       <span className="pointer-events-none absolute right-6 top-7 font-ui text-[11px] uppercase tracking-[0.3em] text-cream/80">
         Lucknow • UP
       </span>
+
+      <a
+        href="https://x.com/Shashwat_web3"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Made by Shashwat_web3 on X (opens in new tab)"
+        title="Made by @Shashwat_web3"
+        className="absolute bottom-3 right-3 font-ui text-[9px] uppercase leading-none tracking-[0.2em] text-cream/75 drop-shadow-[0_1px_0_color-mix(in_oklab,var(--ink)_60%,transparent)] transition-colors hover:text-cream sm:bottom-6 sm:right-6 sm:text-[11px] sm:tracking-[0.3em]"
+      >
+        Made by <span className="font-bold">@Shashwat_web3</span>
+      </a>
     </div>
   );
 }
