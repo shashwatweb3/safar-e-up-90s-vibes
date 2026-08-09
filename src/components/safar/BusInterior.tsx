@@ -41,8 +41,9 @@ export function BusInterior({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
+        layout="width-fit"
+        transform={(mobile) => `scale(${entering ? 1.28 : mobile ? 1 : 1.02})`}
         className="transition-transform duration-[1200ms] ease-out"
-        style={{ transform: `translate(-50%, -50%) scale(${entering ? 1.28 : 1.02})` }}
       >
         <div
           role="img"
@@ -80,7 +81,7 @@ export function BusInterior({
           type="button"
           aria-label="सीट"
           onClick={() => setToast("यही वाली सीट ठीक है।")}
-          className="absolute bottom-[18%] left-[26%] h-[26%] w-[34%] cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)]"
+          className="absolute bottom-[18%] left-[26%] h-[26%] w-[34%] cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)] max-sm:h-[30%] max-sm:w-[42%]"
         />
       </CoverStage>
 
@@ -96,7 +97,7 @@ export function BusInterior({
       <button
         type="button"
         onClick={onReturnToStop}
-        className="signboard paint-edge absolute left-4 top-4 z-40 rotate-[-1.2deg] px-3 py-2 font-hindi text-sm font-bold active:translate-y-[2px] sm:px-4 sm:text-base"
+        className="signboard paint-edge absolute left-4 top-4 z-40 rotate-[-1.2deg] px-3 py-2.5 font-hindi text-sm font-bold active:translate-y-[2px] sm:px-4 sm:py-2 sm:text-base"
       >
         ⟵ बस स्टॉप
       </button>
@@ -104,7 +105,7 @@ export function BusInterior({
       <button
         type="button"
         onClick={onOpenPlaylist}
-        className="signboard paint-edge absolute right-4 top-4 z-40 rotate-[1deg] px-3 py-2 font-hindi text-sm font-bold active:translate-y-[2px] sm:px-4 sm:text-base"
+        className="signboard paint-edge absolute right-4 top-4 z-40 rotate-[1deg] px-3 py-2.5 font-hindi text-sm font-bold active:translate-y-[2px] sm:px-4 sm:py-2 sm:text-base"
       >
         📻 रेडियो
       </button>

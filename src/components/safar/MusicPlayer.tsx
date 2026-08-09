@@ -26,7 +26,7 @@ export function MusicPlayer({
 
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-50 flex justify-center p-3 sm:p-5">
-      <div className="panel-paper w-full max-w-3xl rotate-[-0.25deg] border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] px-3 py-3 sm:px-5 sm:py-4">
+      <div className="panel-paper w-full max-w-3xl rotate-[-0.25deg] border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-5">
         <div className="flex items-center gap-3 sm:gap-4">
           {/* The official YouTube embed is framed as the cassette's tiny screen. */}
           <div className="relative hidden h-16 w-28 shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] sm:block">
@@ -71,7 +71,7 @@ export function MusicPlayer({
                 onChange={(event) => player.seek(Number(event.target.value))}
                 aria-label="गाने की प्रगति"
                 disabled={!ready || searching || duration === 0}
-                className="h-1.5 w-full cursor-pointer appearance-none rounded-none bg-[color-mix(in_oklab,var(--ink)_25%,transparent)] accent-[var(--brick)] disabled:cursor-not-allowed"
+                className="h-2 w-full cursor-pointer appearance-none rounded-none bg-[color-mix(in_oklab,var(--ink)_25%,transparent)] accent-[var(--brick)] disabled:cursor-not-allowed sm:h-1.5"
                 style={{
                   background: `linear-gradient(90deg, var(--brick) ${percentage}%, color-mix(in oklab, var(--ink) 22%, transparent) ${percentage}%)`,
                 }}
@@ -115,7 +115,7 @@ export function MusicPlayer({
             <button
               type="button"
               onClick={player.play}
-              className="ml-auto border-2 border-ink bg-brick px-3 py-1 font-hindi text-sm font-bold text-cream shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_70%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none"
+              className="ml-auto flex-1 border-2 border-ink bg-brick px-3 py-2.5 font-hindi text-base font-bold text-cream shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_70%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none sm:flex-none sm:px-3 sm:py-1 sm:text-sm"
             >
               ▶ गाना चलाएँ
             </button>
@@ -157,7 +157,9 @@ function Key({
       onClick={onClick}
       aria-label={label}
       className={`border-2 border-[color-mix(in_oklab,var(--ink)_55%,transparent)] bg-[color-mix(in_oklab,var(--mustard)_70%,var(--cream))] font-ui text-[11px] leading-none text-ink shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_55%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none ${
-        big ? "h-11 w-11 text-sm" : "h-9 w-9"
+        big
+          ? "h-12 w-12 text-sm sm:h-11 sm:w-11 sm:pointer-coarse:h-12 sm:pointer-coarse:w-12"
+          : "h-11 w-11 sm:h-9 sm:w-9 sm:pointer-coarse:h-11 sm:pointer-coarse:w-11"
       }`}
     >
       {children}

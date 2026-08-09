@@ -53,7 +53,7 @@ export function BusWindow({
             "linear-gradient(115deg, color-mix(in oklab, var(--cream) 34%, transparent) 0%, transparent 38%, color-mix(in oklab, var(--mustard) 22%, transparent) 100%)",
         }}
       />
-      <span className="absolute bottom-[14%] left-2 rounded-[2px] bg-[color-mix(in_oklab,var(--ink)_72%,transparent)] px-2 py-1 font-hindi text-xs text-cream opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+      <span className="absolute bottom-[14%] left-2 rounded-[2px] bg-[color-mix(in_oklab,var(--ink)_72%,transparent)] px-2 py-1 font-hindi text-xs text-cream opacity-100 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100">
         {label}
       </span>
       <style>{`

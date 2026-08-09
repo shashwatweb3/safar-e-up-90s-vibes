@@ -9,10 +9,10 @@ export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leavin
   return (
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
+        layout="center"
+        mobileShift={17}
+        transform={(mobile) => `scale(${leaving ? 3.4 : mobile ? 1 : hovering ? 1.045 : 1.02})`}
         className="origin-[71%_60%] transition-transform duration-[1400ms] ease-[cubic-bezier(0.7,0,0.3,1)]"
-        style={{
-          transform: `translate(-50%, -50%) scale(${leaving ? 3.4 : hovering ? 1.045 : 1.02})`,
-        }}
       >
         <div
           role="img"
@@ -65,7 +65,7 @@ export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leavin
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center transition-all duration-700"
         style={{ opacity: leaving ? 0 : 1, transform: leaving ? "scale(1.35)" : "scale(1)" }}
       >
-        <p className="font-display text-4xl leading-tight text-cream drop-shadow-[0_4px_0_color-mix(in_oklab,var(--ink)_75%,transparent)] sm:text-6xl md:text-7xl">
+        <p className="font-display text-[clamp(1.75rem,8.5vw,2.25rem)] leading-tight text-cream drop-shadow-[0_4px_0_color-mix(in_oklab,var(--ink)_75%,transparent)] sm:text-6xl md:text-7xl">
           अगली बस आ गई है।
         </p>
         <p className="mt-4 font-hindi text-xl font-semibold text-[color-mix(in_oklab,var(--cream)_92%,var(--mustard))] drop-shadow-[0_2px_0_color-mix(in_oklab,var(--ink)_70%,transparent)] sm:text-2xl">
@@ -92,7 +92,7 @@ export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leavin
         rel="noopener noreferrer"
         aria-label="Made by Shashwat_web3 on X (opens in new tab)"
         title="Made by @Shashwat_web3"
-        className="absolute bottom-3 right-3 font-ui text-[9px] uppercase leading-none tracking-[0.2em] text-cream/75 drop-shadow-[0_1px_0_color-mix(in_oklab,var(--ink)_60%,transparent)] transition-colors hover:text-cream sm:bottom-6 sm:right-6 sm:text-[11px] sm:tracking-[0.3em]"
+        className="absolute bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 py-1 font-ui text-[9px] uppercase leading-none tracking-[0.2em] text-cream/75 drop-shadow-[0_1px_0_color-mix(in_oklab,var(--ink)_60%,transparent)] transition-colors hover:text-cream sm:bottom-6 sm:right-6 sm:py-0 sm:text-[11px] sm:tracking-[0.3em]"
       >
         Made by <span className="font-bold">@Shashwat_web3</span>
       </a>

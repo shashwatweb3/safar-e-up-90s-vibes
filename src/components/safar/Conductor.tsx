@@ -29,30 +29,32 @@ export function Conductor({
         </span>
       </div>
 
-      <div
-        className="absolute left-[46%] top-[12%] z-40 w-[220px] origin-top-right transition-all duration-400"
-        style={{
-          opacity: open ? 1 : 0,
-          transform: open ? "scale(1) rotate(-1deg)" : "scale(0.9) translateY(-10px)",
-          pointerEvents: open ? "auto" : "none",
-        }}
-      >
-        <div className="panel-paper px-4 py-4">
-          <p className="font-hindi text-base font-bold">कहाँ जाना है?</p>
-          <div className="mt-3 flex flex-col gap-1.5">
-            {destinations.map((d, i) => (
-              <button
-                key={d.en}
-                type="button"
-                onClick={() => onSelect(i)}
-                className="flex items-center justify-between border-b border-dashed border-[color-mix(in_oklab,var(--ink)_25%,transparent)] px-1 py-1.5 text-left font-hindi text-sm transition-colors hover:bg-[color-mix(in_oklab,var(--mustard)_45%,transparent)]"
-              >
-                <span>{d.hi}</span>
-                <span className="font-ui text-[10px] uppercase tracking-widest text-muted-foreground">
-                  ₹{d.fare}
-                </span>
-              </button>
-            ))}
+      <div className="absolute left-0 right-0 top-[12%] z-40 flex justify-center sm:left-[46%] sm:right-auto sm:block">
+        <div
+          className="w-[220px] origin-top-right transition-all duration-400"
+          style={{
+            opacity: open ? 1 : 0,
+            transform: open ? "scale(1) rotate(-1deg)" : "scale(0.9) translateY(-10px)",
+            pointerEvents: open ? "auto" : "none",
+          }}
+        >
+          <div className="panel-paper px-4 py-4">
+            <p className="font-hindi text-base font-bold">कहाँ जाना है?</p>
+            <div className="mt-3 flex flex-col gap-1.5">
+              {destinations.map((d, i) => (
+                <button
+                  key={d.en}
+                  type="button"
+                  onClick={() => onSelect(i)}
+                  className="flex items-center justify-between border-b border-dashed border-[color-mix(in_oklab,var(--ink)_25%,transparent)] px-1 py-1.5 text-left font-hindi text-sm transition-colors hover:bg-[color-mix(in_oklab,var(--mustard)_45%,transparent)]"
+                >
+                  <span>{d.hi}</span>
+                  <span className="font-ui text-[10px] uppercase tracking-widest text-muted-foreground">
+                    ₹{d.fare}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

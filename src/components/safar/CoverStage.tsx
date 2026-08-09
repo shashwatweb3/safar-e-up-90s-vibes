@@ -1,29 +1,50 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 const AR = 1920 / 1088;
 
 /**
- * Renders a fixed-aspect illustrated stage that covers the viewport, so that
- * percentage-positioned hotspots always line up with the artwork.
+ * Renders a fixed-aspect illustrated stage so that percentage-positioned
+ * hotspots always line up with the artwork.
+ *
+ * - "center" (default): the stage covers the viewport and is centered; on
+ *   mobile a `mobileShift` can slide it so a different part of the artwork is
+ *   framed.
+ * - "width-fit": on mobile (<640px) the stage fits the viewport width and is
+ *   anchored to the top, so the entire artwork (and every hotspot) stays on
+ *   screen; on larger screens it behaves like "center".
  */
 export function CoverStage({
   children,
   className,
   style,
+  layout = "center",
+  mobileShift = 0,
+  transform,
 }: {
   children: ReactNode;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
+  layout?: "center" | "width-fit";
+  mobileShift?: number;
+  transform?: (mobile: boolean) => string;
 }) {
-  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  const [size, setSize] = useState<{ w: number; h: number; mobile: boolean } | null>(null);
 
   useEffect(() => {
     const measure = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const w = Math.max(vw, vh * AR);
-      const h = Math.max(vh, vw / AR);
-      setSize({ w: Math.ceil(w), h: Math.ceil(h) });
+      const mobile = vw < 640;
+      let w: number;
+      let h: number;
+      if (mobile && layout === "width-fit") {
+        w = vw;
+        h = vw / AR;
+      } else {
+        w = Math.max(vw, vh * AR);
+        h = Math.max(vh, vw / AR);
+      }
+      setSize({ w: Math.ceil(w), h: Math.ceil(h), mobile });
     };
     measure();
     window.addEventListener("resize", measure);
@@ -32,15 +53,20 @@ export function CoverStage({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, []);
+  }, [layout]);
+
+  const translate = layout === "width-fit" ? "translate(-50%, 0%)" : "translate(-50%, -50%)";
+  const shift = size?.mobile && mobileShift ? ` translateX(-${mobileShift}%)` : "";
+  const extra = transform ? ` ${transform(size?.mobile ?? false)}` : "";
 
   return (
     <div
-      className={`absolute left-1/2 top-1/2 ${className ?? ""}`}
+      className={`absolute left-1/2 ${layout === "width-fit" ? "top-0" : "top-1/2"} ${className ?? ""}`}
       style={{
         width: size ? `${size.w}px` : "100vw",
-        height: size ? `${size.h}px` : "100vh",
+        height: size ? `${size.h}px` : layout === "width-fit" ? "56.6vw" : "100vh",
         visibility: size ? "visible" : "hidden",
+        transform: size ? `${translate}${shift}${extra}` : undefined,
         ...style,
       }}
     >
