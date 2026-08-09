@@ -140,6 +140,7 @@ export function usePlayer(enabled: boolean) {
       candidatesRef.current = cachedVideos;
       candidateIndexRef.current = 0;
       setActiveVideo(cachedVideos[0] ?? null);
+      setSearching(false);
       if (!cachedVideos[0]) setError("No embeddable YouTube result was found for this song.");
       return () => controller.abort();
     }
