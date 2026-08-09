@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { playlists, type DiscoveredVideo } from "@/lib/playlists";
 
 const YOUTUBE_SEARCH_TIMEOUT_MS = 10_000;
+const YOUTUBE_MAX_ATTEMPTS = 3;
+const RESULT_CACHE_TTL_MS = 5 * 60_000;
 
 type YouTubeSearchResponse = {
   items?: Array<{
@@ -53,11 +55,15 @@ function youTubeErrorDetails(payload: unknown): {
   return { code: err?.code, reason: err?.errors?.[0]?.reason };
 }
 
-async function searchYouTube(
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchYouTubeSearch(
   apiKey: string,
   query: string,
   musicOnly: boolean,
-): Promise<DiscoveredVideo[]> {
+): Promise<Response> {
   const params: Record<string, string> = {
     key: apiKey,
     maxResults: "10",
@@ -74,54 +80,61 @@ async function searchYouTube(
   const searchUrl = new URL("https://www.googleapis.com/youtube/v3/search");
   searchUrl.search = new URLSearchParams(params).toString();
 
-  let youtubeResponse: Response;
-  try {
-    youtubeResponse = await fetch(searchUrl, {
-      signal: AbortSignal.timeout(YOUTUBE_SEARCH_TIMEOUT_MS),
-    });
-  } catch (error) {
-    console.error("YouTube discovery fetch failed", error);
-    throw new DiscoveryError("YouTube search is temporarily unavailable.", 502);
-  }
+  let lastCode: number | undefined;
+  let lastReason: string | undefined;
+  let lastStatus = 0;
 
-  if (!youtubeResponse.ok) {
+  // Only retry transport-level failures (fetch threw). YouTube HTTP errors,
+  // including 429 quota exhaustion, are final: retrying them would only burn
+  // more quota and add latency.
+  for (let attempt = 0; attempt < YOUTUBE_MAX_ATTEMPTS; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(searchUrl, {
+        signal: AbortSignal.timeout(YOUTUBE_SEARCH_TIMEOUT_MS),
+      });
+    } catch (error) {
+      console.error("YouTube discovery fetch failed", error);
+      if (attempt < YOUTUBE_MAX_ATTEMPTS - 1) {
+        await sleep(1_000 * 2 ** attempt);
+        continue;
+      }
+      throw new DiscoveryError("YouTube search is temporarily unavailable.", 502);
+    }
+
+    if (response.ok) return response;
+
     let code: number | undefined;
     let reason: string | undefined;
     try {
-      const body = (await youtubeResponse.json()) as unknown;
+      const body = (await response.json()) as unknown;
       ({ code, reason } = youTubeErrorDetails(body));
     } catch {
       // Non-JSON error body; status alone is still useful.
     }
+    lastCode = code ?? response.status;
+    lastReason = reason;
+    lastStatus = response.status;
+
     console.error("YouTube discovery request failed", {
-      status: youtubeResponse.status,
-      code,
-      reason,
+      status: response.status,
+      code: lastCode,
+      reason: lastReason,
     });
-    throw new DiscoveryError(
-      "YouTube search is temporarily unavailable.",
-      502,
-      code ?? youtubeResponse.status,
-      reason,
-    );
+    break;
   }
 
-  let payload: unknown;
-  try {
-    payload = await youtubeResponse.json();
-  } catch (error) {
-    console.error("YouTube discovery response parse failed", error);
-    throw new DiscoveryError(
-      "YouTube search is temporarily unavailable.",
-      502,
-      undefined,
-      "malformed_response",
-    );
-  }
+  throw new DiscoveryError(
+    "YouTube search is temporarily unavailable.",
+    502,
+    lastCode,
+    lastReason ?? (lastStatus > 0 ? `http_${lastStatus}` : undefined),
+  );
+}
 
+function parseYouTubeResponse(payload: unknown): DiscoveredVideo[] {
   const items = (payload as YouTubeSearchResponse)?.items;
   if (!Array.isArray(items)) {
-    console.error("YouTube discovery response had no items array", payload);
     throw new DiscoveryError(
       "YouTube search is temporarily unavailable.",
       502,
@@ -142,6 +155,27 @@ async function searchYouTube(
   });
 }
 
+async function searchYouTube(
+  apiKey: string,
+  query: string,
+  musicOnly: boolean,
+): Promise<DiscoveredVideo[]> {
+  const response = await fetchYouTubeSearch(apiKey, query, musicOnly);
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    console.error("YouTube discovery response parse failed", error);
+    throw new DiscoveryError(
+      "YouTube search is temporarily unavailable.",
+      502,
+      undefined,
+      "malformed_response",
+    );
+  }
+  return parseYouTubeResponse(payload);
+}
+
 /**
  * Prefer results whose titles echo the song's own title words. The Data API
  * search already sorts by relevance, this only nudges official-style
@@ -160,15 +194,27 @@ function rankCandidates(candidates: DiscoveredVideo[], songTitle: string): Disco
   return [...candidates].sort((a, b) => score(b.title) - score(a.title)).slice(0, 8);
 }
 
+// In-process cache so repeated plays of the same song don't hit YouTube again.
+// Keeps us well below Google's rate limits when the app auto-plays playlists.
+const resultCache = new Map<string, { candidates: DiscoveredVideo[]; expiresAt: number }>();
+
 export const Route = createFileRoute("/api/youtube-discovery")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const songId = new URL(request.url).searchParams.get("song");
+        const songId = new URL(request.url).searchParams.get("song") ?? "";
         const song = playlists
           .flatMap((playlist) => playlist.songs)
           .find((item) => item.id === songId);
         if (!song) return jsonError("Unknown song.", 400);
+
+        const cached = resultCache.get(songId);
+        if (cached && cached.expiresAt > Date.now()) {
+          return Response.json(
+            { candidates: cached.candidates },
+            { headers: { "cache-control": "private, max-age=300" } },
+          );
+        }
 
         const apiKey = process.env["YOUTUBE_API_KEY"];
         if (!apiKey) {
@@ -181,9 +227,14 @@ export const Route = createFileRoute("/api/youtube-discovery")({
           if (candidates.length === 0) {
             candidates = await searchYouTube(apiKey, song.searchQuery, false);
           }
+          const ranked = rankCandidates(candidates, song.title);
+          resultCache.set(songId, {
+            candidates: ranked,
+            expiresAt: Date.now() + RESULT_CACHE_TTL_MS,
+          });
 
           return Response.json(
-            { candidates: rankCandidates(candidates, song.title) },
+            { candidates: ranked },
             { headers: { "cache-control": "private, max-age=300" } },
           );
         } catch (error) {
