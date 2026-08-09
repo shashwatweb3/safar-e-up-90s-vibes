@@ -1,203 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { playlists, type DiscoveredVideo } from "@/lib/playlists";
+import { playlists } from "@/lib/playlists";
+import { getCachedCandidates } from "@/lib/youtube-cache";
 
-const YOUTUBE_SEARCH_TIMEOUT_MS = 10_000;
-const YOUTUBE_MAX_ATTEMPTS = 3;
-const RESULT_CACHE_TTL_MS = 5 * 60_000;
-
-type YouTubeSearchResponse = {
-  items?: Array<{
-    id?: { videoId?: string };
-    snippet?: {
-      title?: string;
-      thumbnails?: {
-        medium?: { url?: string };
-        default?: { url?: string };
-      };
-    };
-  }>;
-};
-
-type YouTubeErrorPayload = {
-  error?: {
-    code?: number;
-    message?: string;
-    errors?: Array<{ reason?: string }>;
-  };
-};
-
-class DiscoveryError extends Error {
-  readonly status: number;
-  readonly code?: number | undefined;
-  readonly reason?: string | undefined;
-
-  constructor(message: string, status: number, code?: number, reason?: string) {
-    super(message);
-    this.status = status;
-    this.code = code;
-    this.reason = reason;
-  }
-}
-
-function jsonError(message: string, status: number, code?: number, reason?: string) {
-  return Response.json(
-    { error: message, ...(code !== undefined && { code }), ...(reason && { reason }) },
-    { status, headers: { "cache-control": "no-store" } },
-  );
-}
-
-/** Pull YouTube's error code/reason from its JSON error body (safe, no key). */
-function youTubeErrorDetails(payload: unknown): {
-  code?: number | undefined;
-  reason?: string | undefined;
-} {
-  const err = (payload as YouTubeErrorPayload)?.error;
-  return { code: err?.code, reason: err?.errors?.[0]?.reason };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function fetchYouTubeSearch(
-  apiKey: string,
-  query: string,
-  musicOnly: boolean,
-): Promise<Response> {
-  const params: Record<string, string> = {
-    key: apiKey,
-    maxResults: "10",
-    part: "snippet",
-    q: query,
-    type: "video",
-    videoEmbeddable: "true",
-    relevanceLanguage: "hi",
-  };
-  // Bias towards the Music category first; the caller retries without it
-  // when a category-filtered search comes back empty.
-  if (musicOnly) params["videoCategoryId"] = "10";
-
-  const searchUrl = new URL("https://www.googleapis.com/youtube/v3/search");
-  searchUrl.search = new URLSearchParams(params).toString();
-
-  let lastCode: number | undefined;
-  let lastReason: string | undefined;
-  let lastStatus = 0;
-
-  // Only retry transport-level failures (fetch threw). YouTube HTTP errors,
-  // including 429 quota exhaustion, are final: retrying them would only burn
-  // more quota and add latency.
-  for (let attempt = 0; attempt < YOUTUBE_MAX_ATTEMPTS; attempt++) {
-    let response: Response;
-    try {
-      response = await fetch(searchUrl, {
-        signal: AbortSignal.timeout(YOUTUBE_SEARCH_TIMEOUT_MS),
-      });
-    } catch (error) {
-      console.error("YouTube discovery fetch failed", error);
-      if (attempt < YOUTUBE_MAX_ATTEMPTS - 1) {
-        await sleep(1_000 * 2 ** attempt);
-        continue;
-      }
-      throw new DiscoveryError("YouTube search is temporarily unavailable.", 502);
-    }
-
-    if (response.ok) return response;
-
-    let code: number | undefined;
-    let reason: string | undefined;
-    try {
-      const body = (await response.json()) as unknown;
-      ({ code, reason } = youTubeErrorDetails(body));
-    } catch {
-      // Non-JSON error body; status alone is still useful.
-    }
-    lastCode = code ?? response.status;
-    lastReason = reason;
-    lastStatus = response.status;
-
-    console.error("YouTube discovery request failed", {
-      status: response.status,
-      code: lastCode,
-      reason: lastReason,
-    });
-    break;
-  }
-
-  throw new DiscoveryError(
-    "YouTube search is temporarily unavailable.",
-    502,
-    lastCode,
-    lastReason ?? (lastStatus > 0 ? `http_${lastStatus}` : undefined),
-  );
-}
-
-function parseYouTubeResponse(payload: unknown): DiscoveredVideo[] {
-  const items = (payload as YouTubeSearchResponse)?.items;
-  if (!Array.isArray(items)) {
-    throw new DiscoveryError(
-      "YouTube search is temporarily unavailable.",
-      502,
-      undefined,
-      "malformed_response",
-    );
-  }
-
-  const seen = new Set<string>();
-  return items.flatMap((item) => {
-    const videoId = item.id?.videoId;
-    const title = item.snippet?.title;
-    const thumbnailUrl =
-      item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url;
-    if (!videoId || !title || !thumbnailUrl || seen.has(videoId)) return [];
-    seen.add(videoId);
-    return [{ videoId, title, thumbnailUrl }];
-  });
-}
-
-async function searchYouTube(
-  apiKey: string,
-  query: string,
-  musicOnly: boolean,
-): Promise<DiscoveredVideo[]> {
-  const response = await fetchYouTubeSearch(apiKey, query, musicOnly);
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    console.error("YouTube discovery response parse failed", error);
-    throw new DiscoveryError(
-      "YouTube search is temporarily unavailable.",
-      502,
-      undefined,
-      "malformed_response",
-    );
-  }
-  return parseYouTubeResponse(payload);
+function jsonError(message: string, status: number) {
+  return Response.json({ error: message }, { status, headers: { "cache-control": "no-store" } });
 }
 
 /**
- * Prefer results whose titles echo the song's own title words. The Data API
- * search already sorts by relevance, this only nudges official-style
- * uploads (titles usually carry the song name) above unrelated re-uploads.
+ * Serves the static, pre-discovered candidates from src/lib/youtube-cache.json
+ * (built by `npm run discover-songs`). This route never calls the YouTube Data
+ * API, so visitors consume zero search quota.
  */
-function rankCandidates(candidates: DiscoveredVideo[], songTitle: string): DiscoveredVideo[] {
-  const words = songTitle
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((word) => word.length > 2);
-  if (words.length === 0) return candidates;
-
-  const score = (title: string) =>
-    words.reduce((total, word) => total + (title.toLowerCase().includes(word) ? 1 : 0), 0);
-
-  return [...candidates].sort((a, b) => score(b.title) - score(a.title)).slice(0, 8);
-}
-
-// In-process cache so repeated plays of the same song don't hit YouTube again.
-// Keeps us well below Google's rate limits when the app auto-plays playlists.
-const resultCache = new Map<string, { candidates: DiscoveredVideo[]; expiresAt: number }>();
-
 export const Route = createFileRoute("/api/youtube-discovery")({
   server: {
     handlers: {
@@ -208,43 +21,22 @@ export const Route = createFileRoute("/api/youtube-discovery")({
           .find((item) => item.id === songId);
         if (!song) return jsonError("Unknown song.", 400);
 
-        const cached = resultCache.get(songId);
-        if (cached && cached.expiresAt > Date.now()) {
-          return Response.json(
-            { candidates: cached.candidates },
-            { headers: { "cache-control": "private, max-age=300" } },
+        const candidates = getCachedCandidates(songId);
+        if (candidates.length === 0) {
+          return jsonError(
+            "No cached YouTube results for this song yet. Run `npm run discover-songs` to refresh the cache.",
+            503,
           );
         }
 
-        const apiKey = process.env["YOUTUBE_API_KEY"];
-        if (!apiKey) {
-          console.error("YOUTUBE_API_KEY is not configured.");
-          return jsonError("Music discovery is not configured yet.", 503);
-        }
-
-        try {
-          let candidates = await searchYouTube(apiKey, song.searchQuery, true);
-          if (candidates.length === 0) {
-            candidates = await searchYouTube(apiKey, song.searchQuery, false);
-          }
-          const ranked = rankCandidates(candidates, song.title);
-          resultCache.set(songId, {
-            candidates: ranked,
-            expiresAt: Date.now() + RESULT_CACHE_TTL_MS,
-          });
-
-          return Response.json(
-            { candidates: ranked },
-            { headers: { "cache-control": "private, max-age=300" } },
-          );
-        } catch (error) {
-          if (error instanceof DiscoveryError) {
-            console.error("YouTube discovery failed", { reason: error.reason, code: error.code });
-            return jsonError(error.message, error.status, error.code, error.reason);
-          }
-          console.error("YouTube discovery request failed", error);
-          return jsonError("YouTube search is temporarily unavailable.", 502);
-        }
+        return Response.json(
+          { candidates },
+          {
+            headers: {
+              "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+            },
+          },
+        );
       },
     },
   },

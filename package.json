@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "discover-songs": "node scripts/discover-songs.ts",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write ."
   },

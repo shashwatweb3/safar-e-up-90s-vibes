@@ -35,7 +35,10 @@ function Safar() {
   const [entering, setEntering] = useState(false);
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [interacted, setInteracted] = useState(false);
-  const player = usePlayer(stage === "bus" && interacted);
+  // The player initializes and cues the first song on page load (while the bus
+  // stop is visible, panel hidden). `interacted` flips on the board click,
+  // which becomes the trusted gesture that starts playback.
+  const player = usePlayer(interacted);
 
   useAmbience(stage === "bus" ? "bus" : stage === "stop" ? "stop" : "off", interacted);
 
@@ -43,9 +46,10 @@ function Safar() {
     setInteracted(true);
     setStage("boarding");
     setEntering(true);
+    player.play();
     window.setTimeout(() => setStage("bus"), 1250);
     window.setTimeout(() => setEntering(false), 1400);
-  }, []);
+  }, [player]);
 
   const returnToStop = useCallback(() => {
     setStage("stop");
@@ -78,7 +82,6 @@ function Safar() {
 
       {stage === "bus" && (
         <>
-          <MusicPlayer player={player} onOpenPlaylist={() => setPlaylistOpen(true)} />
           <PlaylistPanel
             open={playlistOpen}
             onClose={() => setPlaylistOpen(false)}
@@ -86,6 +89,12 @@ function Safar() {
           />
         </>
       )}
+
+      {/* Always mounted so the cassette player preloads at the bus stop; hidden
+          until the user boards. */}
+      <div className={stage === "bus" ? "" : "pointer-events-none opacity-0"}>
+        <MusicPlayer player={player} onOpenPlaylist={() => setPlaylistOpen(true)} />
+      </div>
 
       <FilmGrainOverlay />
     </main>

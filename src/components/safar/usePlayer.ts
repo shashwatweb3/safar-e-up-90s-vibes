@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { playlists, type DiscoveredVideo } from "@/lib/playlists";
+import { getCachedCandidates } from "@/lib/youtube-cache";
 
 type YouTubePlayerState = -1 | 0 | 1 | 2 | 3 | 5;
 
@@ -69,20 +70,16 @@ function playerErrorMessage(code: number): string {
   return "This YouTube result could not be played.";
 }
 
-async function discoverVideos(songId: string, signal: AbortSignal): Promise<DiscoveredVideo[]> {
-  const response = await fetch(`/api/youtube-discovery?song=${encodeURIComponent(songId)}`, {
-    signal,
-  });
-  const payload = (await response.json().catch(() => null)) as {
-    candidates?: DiscoveredVideo[];
-    error?: string;
-  } | null;
-  if (!response.ok) throw new Error(payload?.error ?? "Could not find a YouTube result.");
-  return payload?.candidates ?? [];
-}
-
-/** Controls official YouTube playback while preserving Safar-e-UP's custom UI. */
-export function usePlayer(enabled: boolean) {
+/**
+ * Controls official YouTube playback while preserving Safar-e-UP's custom UI.
+ *
+ * Candidates come from the static youtube-cache.json (never the live API), so
+ * the first video is known the moment the app loads. The embedded player is
+ * initialized and the first song cued while the user is still at the bus stop;
+ * playback starts only once the user boards the bus (`interacted`), so the
+ * board click is the browser-policy-friendly gesture.
+ */
+export function usePlayer(interacted: boolean) {
   const [listIndex, setListIndex] = useState(0);
   const [songIndex, setSongIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -93,15 +90,13 @@ export function usePlayer(enabled: boolean) {
   const [error, setError] = useState<string | null>(null);
   const [activeVideo, setActiveVideo] = useState<DiscoveredVideo | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  // Set when the browser's autoplay policy rejected our automatic playVideo()
-  // (the board click's gesture does not survive the async discovery + iframe
-  // load). Once set, the player is recreated with YouTube's native controls so
-  // clicking the cassette screen is a guaranteed fresh, in-iframe gesture.
+  // Set when the browser's autoplay policy rejected our playVideo(). Once set,
+  // the player is recreated with YouTube's native controls so clicking the
+  // cassette screen is a guaranteed fresh, in-iframe gesture.
   const [needsTap, setNeedsTap] = useState(false);
   const needsTapRef = useRef(false);
   const playerElementRef = useRef<HTMLDivElement | null>(null);
   const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
-  const sessionCacheRef = useRef(new Map<string, DiscoveredVideo[]>());
   const candidatesRef = useRef<DiscoveredVideo[]>([]);
   const candidateIndexRef = useRef(0);
 
@@ -134,50 +129,19 @@ export function usePlayer(enabled: boolean) {
   }, []);
 
   useEffect(() => {
-    if (!enabled) return;
-    const controller = new AbortController();
-    const cachedVideos = sessionCacheRef.current.get(song.id);
-
-    setActiveVideo(null);
+    // Static cache lookup — synchronous, no network, no YouTube Data API.
+    const cached = getCachedCandidates(song.id);
+    candidatesRef.current = cached;
+    candidateIndexRef.current = 0;
+    setActiveVideo(cached[0] ?? null);
     setProgress(0);
     setDuration(0);
-    setError(null);
-
-    if (cachedVideos) {
-      candidatesRef.current = cachedVideos;
-      candidateIndexRef.current = 0;
-      setActiveVideo(cachedVideos[0] ?? null);
-      setSearching(false);
-      if (!cachedVideos[0]) setError("No embeddable YouTube result was found for this song.");
-      return () => controller.abort();
-    }
-
-    setSearching(true);
-    void discoverVideos(song.id, controller.signal)
-      .then((videos) => {
-        if (controller.signal.aborted) return;
-        sessionCacheRef.current.set(song.id, videos);
-        candidatesRef.current = videos;
-        candidateIndexRef.current = 0;
-        if (videos[0]) setActiveVideo(videos[0]);
-        else setError("No embeddable YouTube result was found for this song.");
-      })
-      .catch((searchError: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(
-            searchError instanceof Error ? searchError.message : "Could not search YouTube.",
-          );
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setSearching(false);
-      });
-
-    return () => controller.abort();
-  }, [enabled, retryCount, song.id]);
+    setError(cached[0] ? null : "No embeddable YouTube result was found for this song.");
+    setSearching(false);
+  }, [retryCount, song.id]);
 
   useEffect(() => {
-    if (!enabled || !playerElementRef.current) return;
+    if (!playerElementRef.current) return;
     let cancelled = false;
 
     void loadYouTubeApi()
@@ -227,23 +191,23 @@ export function usePlayer(enabled: boolean) {
       youtubePlayerRef.current = null;
       setReady(false);
     };
-  }, [enabled, needsTap, next, tryNextCandidate]);
+  }, [needsTap, next, tryNextCandidate]);
 
   useEffect(() => {
     const player = youtubePlayerRef.current;
     if (!ready || !activeVideo || !player) return;
     player.loadVideoById(activeVideo.videoId);
-    // The player is initialized only after the user boards. If a browser still
-    // blocks delayed autoplay, the visible custom Play control remains available.
-    if (!needsTapRef.current) player.playVideo();
-  }, [activeVideo, ready]);
+    // Playback is triggered by the board click (trusted gesture). If the click
+    // arrived before the player was ready, `interacted` already flipped and we
+    // still start automatically — the needsTap watchdog covers blocked cases.
+    if (interacted && !needsTapRef.current) player.playVideo();
+  }, [activeVideo, interacted, ready]);
 
-  // Autoplay watchdog: the effect above plays outside the board click's
-  // gesture window. If the browser's policy rejects it, the player sits at
-  // unstarted/cued — switch to tap mode (native controls + play button).
-  // Generous timeout: slow connections may buffer for a few seconds first.
+  // Autoplay watchdog: runs only after the user boarded. If the browser's
+  // policy rejected playback, the player sits at unstarted/cued — switch to
+  // tap mode (native controls + the visible "गाना चलाएँ" button).
   useEffect(() => {
-    if (!ready || !activeVideo || needsTapRef.current) return;
+    if (!interacted || !ready || !activeVideo || needsTapRef.current) return;
     const timer = window.setTimeout(() => {
       const player = youtubePlayerRef.current;
       if (!player || needsTapRef.current) return;
@@ -254,7 +218,7 @@ export function usePlayer(enabled: boolean) {
       }
     }, 6000);
     return () => window.clearTimeout(timer);
-  }, [activeVideo, ready]);
+  }, [activeVideo, interacted, ready]);
 
   useEffect(() => {
     if (!playing) return;
@@ -288,11 +252,10 @@ export function usePlayer(enabled: boolean) {
   }, []);
 
   const retry = useCallback(() => {
-    sessionCacheRef.current.delete(song.id);
     candidatesRef.current = [];
     candidateIndexRef.current = 0;
     setRetryCount((count) => count + 1);
-  }, [song.id]);
+  }, []);
 
   return useMemo(
     () => ({
