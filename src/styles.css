@@ -4,6 +4,48 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-display: "Yatra One", cursive;
+  --font-hindi: "Baloo 2", sans-serif;
+  --font-ui: "Karla", sans-serif;
+  --color-brick: var(--brick);
+  --color-terracotta: var(--terracotta);
+  --color-burnt: var(--burnt);
+  --color-mustard: var(--mustard);
+  --color-dusty: var(--dusty);
+  --color-olive: var(--olive);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --animate-sway: sway 7s ease-in-out infinite;
+  --animate-idle: idle 2.4s ease-in-out infinite;
+  --animate-rumble: rumble 0.7s linear infinite;
+  --animate-dust: dust 26s linear infinite;
+  --animate-ticket: ticket-in 0.8s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-0.4deg) translateY(0); }
+  50% { transform: rotate(0.4deg) translateY(-4px); }
+}
+@keyframes idle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(1.5px) scale(1.001); }
+}
+@keyframes rumble {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(0.6px, -0.6px, 0); }
+  50% { transform: translate3d(-0.4px, 0.5px, 0); }
+  75% { transform: translate3d(0.3px, 0.4px, 0); }
+}
+@keyframes dust {
+  from { background-position: 0 0; }
+  to { background-position: 1200px -300px; }
+}
+@keyframes ticket-in {
+  from { opacity: 0; transform: translate(40px, -60px) rotate(14deg) scale(0.7); }
+  to { opacity: 1; transform: translate(0, 0) rotate(-1.5deg) scale(1); }
+}
+
 /*
  * Design system definition.
  *
@@ -63,25 +105,33 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --brick: oklch(0.46 0.14 32);
+  --terracotta: oklch(0.58 0.13 42);
+  --burnt: oklch(0.63 0.15 55);
+  --mustard: oklch(0.78 0.13 82);
+  --dusty: oklch(0.72 0.06 230);
+  --olive: oklch(0.48 0.07 120);
+  --cream: oklch(0.94 0.035 88);
+  --ink: oklch(0.26 0.035 55);
+  --background: oklch(0.91 0.04 82);
+  --foreground: var(--ink);
+  --card: oklch(0.93 0.035 85);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.93 0.035 85);
+  --popover-foreground: var(--ink);
+  --primary: var(--brick);
+  --primary-foreground: var(--cream);
+  --secondary: var(--mustard);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.86 0.03 80);
+  --muted-foreground: oklch(0.45 0.04 60);
+  --accent: var(--burnt);
+  --accent-foreground: var(--cream);
+  --destructive: oklch(0.52 0.18 28);
+  --destructive-foreground: var(--cream);
+  --border: oklch(0.72 0.05 60);
+  --input: oklch(0.72 0.05 60);
+  --ring: var(--burnt);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +190,32 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-ui);
+    overflow: hidden;
   }
+}
+
+@utility paint-edge {
+  clip-path: polygon(
+    0.6% 2%, 30% 0.4%, 62% 2.4%, 99.4% 0.8%, 99% 34%, 99.6% 70%,
+    98.8% 98.6%, 66% 99.4%, 33% 97.8%, 1.2% 99.2%, 0.4% 62%, 1% 30%
+  );
+}
+
+@utility signboard {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--mustard) 92%, white) 0%, var(--mustard) 55%, color-mix(in oklab, var(--mustard) 82%, var(--brick)) 100%);
+  color: var(--ink);
+  box-shadow:
+    0 2px 0 color-mix(in oklab, var(--ink) 55%, transparent),
+    0 10px 22px -8px color-mix(in oklab, var(--ink) 70%, transparent),
+    inset 0 0 0 3px color-mix(in oklab, var(--brick) 70%, transparent),
+    inset 0 0 0 6px color-mix(in oklab, var(--cream) 55%, transparent);
+}
+
+@utility panel-paper {
+  background:
+    radial-gradient(120% 90% at 20% 0%, color-mix(in oklab, var(--cream) 96%, white) 0%, var(--cream) 55%, color-mix(in oklab, var(--cream) 80%, var(--mustard)) 100%);
+  color: var(--ink);
+  box-shadow: 0 24px 60px -20px color-mix(in oklab, var(--ink) 85%, transparent);
 }
