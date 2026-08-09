@@ -36,16 +36,6 @@ export function MusicPlayer({
                 {searching ? "searching" : "loading"}
               </div>
             )}
-            <a
-              href="https://x.com/Shashwat_web3"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Made by Shashwat_web3 on X (opens in new tab)"
-              title="Made by @Shashwat_web3"
-              className="absolute inset-x-0 top-0 z-20 block bg-gradient-to-b from-black/55 to-transparent px-1 pb-1 pt-0.5 text-left font-ui text-[6px] font-bold uppercase leading-none text-cream/85 transition-colors hover:text-cream"
-            >
-              Made by @Shashwat_web3
-            </a>
           </div>
 
           <div className="min-w-0 flex-1">
@@ -102,15 +92,6 @@ export function MusicPlayer({
           <span className="font-ui text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             youtube
           </span>
-          <a
-            href="https://x.com/Shashwat_web3"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Made by Shashwat_web3 on X (opens in new tab)"
-            className="font-ui text-[9px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-ink sm:hidden"
-          >
-            Made by @Shashwat_web3
-          </a>
           {needsTap && !playing && !error ? (
             <button
               type="button"
