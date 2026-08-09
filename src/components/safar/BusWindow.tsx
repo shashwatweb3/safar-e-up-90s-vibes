@@ -17,8 +17,10 @@ export function BusWindow({
       type="button"
       onClick={onClick}
       aria-label="खिड़की के बाहर का नज़ारा बदलें"
-      className="group absolute left-0 top-[4%] h-[58%] w-[24%] cursor-pointer overflow-hidden"
-      style={{ clipPath: "polygon(0% 4%, 100% 12%, 100% 88%, 0% 96%)" }}
+      className="group absolute left-0 top-0 h-[81%] w-[22%] cursor-pointer overflow-hidden"
+      style={{
+        clipPath: "polygon(0% 0%, 94% 0%, 64% 55%, 60% 88%, 0% 100%)",
+      }}
     >
       <div className="absolute inset-0 bg-[var(--dusty)]" />
       {/* far layer */}
@@ -51,7 +53,7 @@ export function BusWindow({
             "linear-gradient(115deg, color-mix(in oklab, var(--cream) 34%, transparent) 0%, transparent 38%, color-mix(in oklab, var(--mustard) 22%, transparent) 100%)",
         }}
       />
-      <span className="absolute bottom-3 left-3 rounded-[2px] bg-[color-mix(in_oklab,var(--ink)_72%,transparent)] px-2 py-1 font-hindi text-xs text-cream opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+      <span className="absolute bottom-[14%] left-2 rounded-[2px] bg-[color-mix(in_oklab,var(--ink)_72%,transparent)] px-2 py-1 font-hindi text-xs text-cream opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         {label}
       </span>
       <style>{`

@@ -4,6 +4,7 @@ import { BusWindow, type Scenery } from "./BusWindow";
 import { Conductor } from "./Conductor";
 import { BusTicket } from "./BusTicket";
 import { destinations } from "@/lib/playlists";
+import { CoverStage } from "./CoverStage";
 
 const sceneryLabels: Record<Scenery, string> = {
   fields: "उन्नाव के खेत",
@@ -39,9 +40,9 @@ export function BusInterior({
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0 animate-rumble transition-transform duration-[1200ms] ease-out"
-        style={{ transform: entering ? "scale(1.28)" : "scale(1.02)" }}
+      <CoverStage
+        className="animate-rumble transition-transform duration-[1200ms] ease-out"
+        style={{ transform: `translate(-50%, -50%) scale(${entering ? 1.28 : 1.02})` }}
       >
         <img
           src={interior}
@@ -80,7 +81,7 @@ export function BusInterior({
           onClick={() => setToast("यही वाली सीट ठीक है।")}
           className="absolute bottom-[18%] left-[26%] h-[26%] w-[34%] cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)]"
         />
-      </div>
+      </CoverStage>
 
       {/* sun shafts */}
       <div
