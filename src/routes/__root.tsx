@@ -90,6 +90,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         property: "og:image",
         content: "https://safar-e-up.vercel.app/og-image.jpg",
       },
+      {
+        property: "og:image:url",
+        content: "https://safar-e-up.vercel.app/og-image.jpg",
+      },
+      {
+        property: "og:image:secure_url",
+        content: "https://safar-e-up.vercel.app/og-image.jpg",
+      },
+      {
+        property: "og:image:alt",
+        content: "सफ़र-ए-UP — a vintage Uttar Pradesh roadways bus at a small-town bus stop.",
+      },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:type", content: "image/jpeg" },
