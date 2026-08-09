@@ -41,7 +41,7 @@ export function BusInterior({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
-        className="animate-rumble transition-transform duration-[1200ms] ease-out"
+        className="transition-transform duration-[1200ms] ease-out"
         style={{ transform: `translate(-50%, -50%) scale(${entering ? 1.28 : 1.02})` }}
       >
         <img
@@ -49,7 +49,7 @@ export function BusInterior({
           alt="Illustrated interior of an old Uttar Pradesh public bus with worn seats, hanging handles and a conductor"
           width={1920}
           height={1088}
-          className="h-full w-full object-cover"
+          className="h-full w-full animate-rumble object-cover"
         />
 
         <BusWindow
