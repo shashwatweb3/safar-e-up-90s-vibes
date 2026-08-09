@@ -8,7 +8,7 @@ export function BusTicket({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute left-0 right-0 top-[16%] z-40 flex justify-center sm:left-auto sm:right-[6%] sm:block">
+    <div className="absolute left-[50vw] top-[16%] z-40 -translate-x-1/2 sm:left-auto sm:right-[6%] sm:translate-x-0 sm:block">
       <div className="animate-ticket">
         <div className="panel-paper relative w-[min(300px,calc(100vw-2rem))] rotate-[-1.5deg] px-6 py-5 [clip-path:polygon(0_0,100%_0,100%_92%,96%_100%,4%_96%,0_88%)]">
           <div className="border-b border-dashed border-[color-mix(in_oklab,var(--ink)_35%,transparent)] pb-2 text-center">

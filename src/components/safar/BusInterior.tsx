@@ -41,7 +41,8 @@ export function BusInterior({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
-        layout="width-fit"
+        layout="center"
+        mobileAlign="left"
         transform={(mobile) => `scale(${entering ? 1.28 : mobile ? 1 : 1.02})`}
         className="transition-transform duration-[1200ms] ease-out"
       >

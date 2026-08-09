@@ -92,9 +92,9 @@ export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leavin
         rel="noopener noreferrer"
         aria-label="Made by Shashwat_web3 on X (opens in new tab)"
         title="Made by @Shashwat_web3"
-        className="absolute bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 py-1 font-ui text-[9px] uppercase leading-none tracking-[0.2em] text-cream/75 drop-shadow-[0_1px_0_color-mix(in_oklab,var(--ink)_60%,transparent)] transition-colors hover:text-cream sm:bottom-6 sm:right-6 sm:py-0 sm:text-[11px] sm:tracking-[0.3em]"
+        className="absolute bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 py-1 font-ui text-[8px] font-normal normal-case leading-none tracking-[0.18em] text-cream/60 drop-shadow-[0_1px_0_color-mix(in_oklab,var(--ink)_60%,transparent)] transition-colors hover:text-cream sm:bottom-6 sm:right-6 sm:py-0 sm:font-bold sm:text-[11px] sm:uppercase sm:tracking-[0.3em] sm:text-cream/75"
       >
-        Made by <span className="font-bold">@Shashwat_web3</span>
+        Made by <span className="sm:font-bold">@Shashwat_web3</span>
       </a>
     </div>
   );

@@ -12,6 +12,9 @@ const AR = 1920 / 1088;
  * - "width-fit": on mobile (<640px) the stage fits the viewport width and is
  *   anchored to the top, so the entire artwork (and every hotspot) stays on
  *   screen; on larger screens it behaves like "center".
+ * - `mobileAlign="left"`: on mobile (<640px) the covering stage is shifted so
+ *   its left edge lines up with the viewport, framing the left part of the
+ *   artwork; on larger screens the stage stays centered.
  */
 export function CoverStage({
   children,
@@ -19,6 +22,7 @@ export function CoverStage({
   style,
   layout = "center",
   mobileShift = 0,
+  mobileAlign = "center",
   transform,
 }: {
   children: ReactNode;
@@ -26,9 +30,12 @@ export function CoverStage({
   style?: CSSProperties;
   layout?: "center" | "width-fit";
   mobileShift?: number;
+  mobileAlign?: "center" | "left";
   transform?: (mobile: boolean) => string;
 }) {
-  const [size, setSize] = useState<{ w: number; h: number; mobile: boolean } | null>(null);
+  const [size, setSize] = useState<{ w: number; h: number; mobile: boolean; vw: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     const measure = () => {
@@ -44,7 +51,7 @@ export function CoverStage({
         w = Math.max(vw, vh * AR);
         h = Math.max(vh, vw / AR);
       }
-      setSize({ w: Math.ceil(w), h: Math.ceil(h), mobile });
+      setSize({ w: Math.ceil(w), h: Math.ceil(h), mobile, vw });
     };
     measure();
     window.addEventListener("resize", measure);
@@ -55,7 +62,9 @@ export function CoverStage({
     };
   }, [layout]);
 
-  const translate = layout === "width-fit" ? "translate(-50%, 0%)" : "translate(-50%, -50%)";
+  const leftAlign = size?.mobile && mobileAlign === "left";
+  const tx = leftAlign ? `-${(50 * size.vw) / size.w}%` : "-50%";
+  const translate = `translate(${tx}, ${layout === "width-fit" ? "0%" : "-50%"})`;
   const shift = size?.mobile && mobileShift ? ` translateX(-${mobileShift}%)` : "";
   const extra = transform ? ` ${transform(size?.mobile ?? false)}` : "";
 

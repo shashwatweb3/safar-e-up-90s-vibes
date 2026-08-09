@@ -18,7 +18,7 @@ export function Conductor({
         className="absolute left-[62%] top-[10%] h-[62%] w-[16%] cursor-pointer rounded-full outline-none ring-0 transition-[background] duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_16%,transparent)] focus-visible:bg-[color-mix(in_oklab,var(--mustard)_20%,transparent)]"
       />
       <div
-        className="pointer-events-none absolute left-[50%] top-[8%] z-30 transition-all duration-500"
+        className="pointer-events-none absolute left-[50vw] top-[8%] z-30 -translate-x-1/2 transition-all duration-500 sm:left-[50%] sm:translate-x-0"
         style={{
           opacity: open ? 0 : 1,
           transform: open ? "translateY(-8px)" : "translateY(0)",
@@ -29,7 +29,7 @@ export function Conductor({
         </span>
       </div>
 
-      <div className="absolute left-0 right-0 top-[12%] z-40 flex justify-center sm:left-[46%] sm:right-auto sm:block">
+      <div className="absolute left-[50vw] top-[12%] z-40 -translate-x-1/2 sm:left-[46%] sm:translate-x-0 sm:block">
         <div
           className="w-[220px] origin-top-right transition-all duration-400"
           style={{

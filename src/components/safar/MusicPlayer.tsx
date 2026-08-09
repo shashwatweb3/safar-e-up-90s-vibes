@@ -27,7 +27,7 @@ export function MusicPlayer({
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-50 flex justify-center p-3 sm:p-5">
       <div className="panel-paper w-full max-w-3xl rotate-[-0.25deg] border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-5">
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 sm:flex-nowrap sm:items-center sm:gap-4">
           {/* The official YouTube embed is framed as the cassette's tiny screen. */}
           <div className="relative hidden h-16 w-28 shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] sm:block">
             <div ref={player.playerElementRef} className="h-full w-full" />
@@ -42,10 +42,10 @@ export function MusicPlayer({
             <p className="font-ui text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               now playing • {list.name}
             </p>
-            <p className="truncate font-hindi text-lg font-bold leading-tight">
+            <p className="line-clamp-2 font-hindi text-base font-bold leading-snug sm:line-clamp-none sm:truncate sm:text-lg sm:leading-tight">
               {activeVideo?.title ?? song.title}
             </p>
-            <p className="truncate font-ui text-xs text-muted-foreground">
+            <p className="truncate font-ui text-[11px] text-muted-foreground sm:text-xs">
               {searching ? "YouTube खोज रहे हैं…" : "YouTube • 90s cassette"}
             </p>
 
@@ -72,7 +72,7 @@ export function MusicPlayer({
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex w-full shrink-0 items-center justify-center gap-3 sm:w-auto sm:justify-end sm:gap-1.5">
             <Key onClick={player.prev} label="पिछला गाना">
               ◀◀
             </Key>
