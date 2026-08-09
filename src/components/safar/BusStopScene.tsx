@@ -3,13 +3,7 @@ import busStop from "@/assets/bus-stop.jpg";
 import { BoardBusButton } from "./BoardBusButton";
 import { CoverStage } from "./CoverStage";
 
-export function BusStopScene({
-  onBoard,
-  leaving,
-}: {
-  onBoard: () => void;
-  leaving: boolean;
-}) {
+export function BusStopScene({ onBoard, leaving }: { onBoard: () => void; leaving: boolean }) {
   const [hovering, setHovering] = useState(false);
 
   return (
@@ -37,11 +31,23 @@ export function BusStopScene({
         >
           <div
             className="absolute inset-y-0 left-0 w-1/2 bg-[var(--brick)] transition-transform duration-700"
-            style={{ transform: leaving ? "translateX(-105%)" : hovering ? "translateX(-55%)" : "translateX(0)" }}
+            style={{
+              transform: leaving
+                ? "translateX(-105%)"
+                : hovering
+                  ? "translateX(-55%)"
+                  : "translateX(0)",
+            }}
           />
           <div
             className="absolute inset-y-0 right-0 w-1/2 bg-[var(--brick)] transition-transform duration-700"
-            style={{ transform: leaving ? "translateX(105%)" : hovering ? "translateX(55%)" : "translateX(0)" }}
+            style={{
+              transform: leaving
+                ? "translateX(105%)"
+                : hovering
+                  ? "translateX(55%)"
+                  : "translateX(0)",
+            }}
           />
         </div>
       </CoverStage>
@@ -59,20 +65,14 @@ export function BusStopScene({
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center transition-all duration-700"
         style={{ opacity: leaving ? 0 : 1, transform: leaving ? "scale(1.35)" : "scale(1)" }}
       >
-        <p
-          className="font-display text-4xl leading-tight text-cream drop-shadow-[0_4px_0_color-mix(in_oklab,var(--ink)_75%,transparent)] sm:text-6xl md:text-7xl"
-        >
+        <p className="font-display text-4xl leading-tight text-cream drop-shadow-[0_4px_0_color-mix(in_oklab,var(--ink)_75%,transparent)] sm:text-6xl md:text-7xl">
           अगली बस आ गई है।
         </p>
         <p className="mt-4 font-hindi text-xl font-semibold text-[color-mix(in_oklab,var(--cream)_92%,var(--mustard))] drop-shadow-[0_2px_0_color-mix(in_oklab,var(--ink)_70%,transparent)] sm:text-2xl">
           खिड़की वाली सीट खाली है।
         </p>
 
-        <BoardBusButton
-          onClick={onBoard}
-          onHoverChange={setHovering}
-          disabled={leaving}
-        />
+        <BoardBusButton onClick={onBoard} onHoverChange={setHovering} disabled={leaving} />
 
         <p className="mt-8 font-ui text-[11px] uppercase tracking-[0.35em] text-cream/70">
           headphones recommended

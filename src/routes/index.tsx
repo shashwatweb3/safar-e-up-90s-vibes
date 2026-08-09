@@ -35,7 +35,7 @@ function Safar() {
   const [entering, setEntering] = useState(false);
   const [playlistOpen, setPlaylistOpen] = useState(false);
   const [interacted, setInteracted] = useState(false);
-  const player = usePlayer();
+  const player = usePlayer(stage === "bus" && interacted);
 
   useAmbience(stage === "bus" ? "bus" : stage === "stop" ? "stop" : "off", interacted);
 
@@ -45,13 +45,12 @@ function Safar() {
     setEntering(true);
     window.setTimeout(() => setStage("bus"), 1250);
     window.setTimeout(() => setEntering(false), 1400);
-    window.setTimeout(() => player.setPlaying(true), 1800);
-  }, [player]);
+  }, []);
 
   const returnToStop = useCallback(() => {
     setStage("stop");
     setPlaylistOpen(false);
-    player.setPlaying(false);
+    player.pause();
   }, [player]);
 
   useEffect(() => {
@@ -66,9 +65,7 @@ function Safar() {
     <main className="relative h-[100dvh] w-full overflow-hidden bg-ink">
       <h1 className="sr-only">सफ़र-ए-UP — एक सफ़र, कुछ पुराने गाने।</h1>
 
-      {stage !== "bus" && (
-        <BusStopScene onBoard={board} leaving={stage === "boarding"} />
-      )}
+      {stage !== "bus" && <BusStopScene onBoard={board} leaving={stage === "boarding"} />}
       {stage === "bus" && (
         <BusInterior
           entering={entering}

@@ -7,6 +7,10 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // TanStack Start uses Nitro for its SSR server. Pin the deployment adapter so
+  // local builds and Vercel builds produce Vercel's Build Output API format
+  // instead of the Lovable config's Cloudflare fallback.
+  nitro: { preset: "vercel" },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

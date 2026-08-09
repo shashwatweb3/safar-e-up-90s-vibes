@@ -73,9 +73,7 @@ export function BusInterior({
           }}
         />
 
-        {dest && (
-          <BusTicket to={dest} fare={dest.fare} onClose={() => setTicket(null)} />
-        )}
+        {dest && <BusTicket to={dest} fare={dest.fare} onClose={() => setTicket(null)} />}
 
         {/* seat hotspot */}
         <button

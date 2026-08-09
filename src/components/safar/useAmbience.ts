@@ -18,8 +18,7 @@ export function useAmbience(mode: Mode, enabled: boolean) {
     }
     const Ctx =
       window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     const ctx = ctxRef.current ?? new Ctx();
     ctxRef.current = ctx;

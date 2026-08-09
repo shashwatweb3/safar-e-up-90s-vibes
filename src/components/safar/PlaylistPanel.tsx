@@ -89,7 +89,7 @@ export function PlaylistPanel({
                       {song.title}
                     </span>
                     <span className="ml-auto truncate font-ui text-[11px] text-muted-foreground">
-                      {song.movie}
+                      YouTube
                     </span>
                   </button>
                 </li>
