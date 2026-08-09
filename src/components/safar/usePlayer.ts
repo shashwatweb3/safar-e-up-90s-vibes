@@ -7,6 +7,7 @@ type YouTubePlayer = {
   destroy: () => void;
   getCurrentTime: () => number;
   getDuration: () => number;
+  getPlayerState: () => YouTubePlayerState;
   loadVideoById: (videoId: string) => void;
   pauseVideo: () => void;
   playVideo: () => void;
@@ -92,6 +93,12 @@ export function usePlayer(enabled: boolean) {
   const [error, setError] = useState<string | null>(null);
   const [activeVideo, setActiveVideo] = useState<DiscoveredVideo | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  // Set when the browser's autoplay policy rejected our automatic playVideo()
+  // (the board click's gesture does not survive the async discovery + iframe
+  // load). Once set, the player is recreated with YouTube's native controls so
+  // clicking the cassette screen is a guaranteed fresh, in-iframe gesture.
+  const [needsTap, setNeedsTap] = useState(false);
+  const needsTapRef = useRef(false);
   const playerElementRef = useRef<HTMLDivElement | null>(null);
   const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
   const sessionCacheRef = useRef(new Map<string, DiscoveredVideo[]>());
@@ -176,10 +183,13 @@ export function usePlayer(enabled: boolean) {
     void loadYouTubeApi()
       .then((YT) => {
         if (cancelled || !playerElementRef.current) return;
+        // In tap mode the player carries YouTube's own controls so a click
+        // inside the iframe is a trusted gesture that always starts playback.
+        const controls = needsTap ? 1 : 0;
         youtubePlayerRef.current = new YT.Player(playerElementRef.current, {
           playerVars: {
             autoplay: 0,
-            controls: 0,
+            controls,
             disablekb: 1,
             fs: 0,
             modestbranding: 1,
@@ -217,7 +227,7 @@ export function usePlayer(enabled: boolean) {
       youtubePlayerRef.current = null;
       setReady(false);
     };
-  }, [enabled, next, tryNextCandidate]);
+  }, [enabled, needsTap, next, tryNextCandidate]);
 
   useEffect(() => {
     const player = youtubePlayerRef.current;
@@ -225,7 +235,25 @@ export function usePlayer(enabled: boolean) {
     player.loadVideoById(activeVideo.videoId);
     // The player is initialized only after the user boards. If a browser still
     // blocks delayed autoplay, the visible custom Play control remains available.
-    player.playVideo();
+    if (!needsTapRef.current) player.playVideo();
+  }, [activeVideo, ready]);
+
+  // Autoplay watchdog: the effect above plays outside the board click's
+  // gesture window. If the browser's policy rejects it, the player sits at
+  // unstarted/cued — switch to tap mode (native controls + play button).
+  // Generous timeout: slow connections may buffer for a few seconds first.
+  useEffect(() => {
+    if (!ready || !activeVideo || needsTapRef.current) return;
+    const timer = window.setTimeout(() => {
+      const player = youtubePlayerRef.current;
+      if (!player || needsTapRef.current) return;
+      const state = player.getPlayerState();
+      if (state !== 1 && state !== 2 && state !== 3) {
+        needsTapRef.current = true;
+        setNeedsTap(true);
+      }
+    }, 6000);
+    return () => window.clearTimeout(timer);
   }, [activeVideo, ready]);
 
   useEffect(() => {
@@ -273,6 +301,7 @@ export function usePlayer(enabled: boolean) {
       error,
       list,
       listIndex,
+      needsTap,
       next,
       pause,
       play,
@@ -295,6 +324,7 @@ export function usePlayer(enabled: boolean) {
       error,
       list,
       listIndex,
+      needsTap,
       next,
       pause,
       play,

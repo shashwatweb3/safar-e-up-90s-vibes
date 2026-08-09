@@ -10,7 +10,18 @@ export function MusicPlayer({
   player: Player;
   onOpenPlaylist: () => void;
 }) {
-  const { song, list, playing, progress, duration, error, ready, searching, activeVideo } = player;
+  const {
+    song,
+    list,
+    playing,
+    progress,
+    duration,
+    error,
+    ready,
+    searching,
+    activeVideo,
+    needsTap,
+  } = player;
   const percentage = duration > 0 ? Math.min(100, (progress / duration) * 100) : 0;
 
   return (
@@ -81,10 +92,20 @@ export function MusicPlayer({
           <span className="font-ui text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             youtube
           </span>
-          <span className="ml-auto text-right font-ui text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {error ??
-              (searching ? "searching YouTube" : ready ? "embedded player" : "loading cassette")}
-          </span>
+          {needsTap && !playing && !error ? (
+            <button
+              type="button"
+              onClick={player.play}
+              className="ml-auto border-2 border-ink bg-brick px-3 py-1 font-hindi text-sm font-bold text-cream shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_70%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none"
+            >
+              ▶ गाना चलाएँ
+            </button>
+          ) : (
+            <span className="ml-auto text-right font-ui text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              {error ??
+                (searching ? "searching YouTube" : ready ? "embedded player" : "loading cassette")}
+            </span>
+          )}
           {error && (
             <button
               type="button"
