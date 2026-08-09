@@ -20,12 +20,15 @@ export function BusStopScene({
           transform: `translate(-50%, -50%) scale(${leaving ? 3.4 : hovering ? 1.045 : 1.02})`,
         }}
       >
-        <img
-          src={busStop}
-          alt="Illustrated Uttar Pradesh small-town bus stop with an old red and cream roadways bus, tea stall and paan shop"
-          width={1920}
-          height={1088}
-          className="h-full w-full object-cover animate-idle"
+        <div
+          role="img"
+          aria-label="Illustrated Uttar Pradesh small-town bus stop with an old red and cream roadways bus, tea stall and paan shop"
+          className="animate-idle absolute inset-0"
+          style={{
+            backgroundImage: `url(${busStop})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+          }}
         />
         {/* bus doorway that opens into darkness on hover / boarding */}
         <div
