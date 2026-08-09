@@ -10,7 +10,7 @@ export function MusicPlayer({
   player: Player;
   onOpenPlaylist: () => void;
 }) {
-  const { song, list, playing, progress, duration, error, ready } = player;
+  const { song, list, playing, progress, duration, error, ready, searching, activeVideo } = player;
   const percentage = duration > 0 ? Math.min(100, (progress / duration) * 100) : 0;
 
   return (
@@ -20,9 +20,9 @@ export function MusicPlayer({
           {/* The official YouTube embed is framed as the cassette's tiny screen. */}
           <div className="relative hidden h-16 w-28 shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] sm:block">
             <div ref={player.playerElementRef} className="h-full w-full" />
-            {!ready && !error && (
+            {(!ready || searching) && !error && (
               <div className="absolute inset-0 grid place-items-center bg-[var(--brick)] font-ui text-[9px] uppercase tracking-widest text-cream">
-                loading
+                {searching ? "searching" : "loading"}
               </div>
             )}
           </div>
@@ -31,8 +31,12 @@ export function MusicPlayer({
             <p className="font-ui text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               now playing • {list.name}
             </p>
-            <p className="truncate font-hindi text-lg font-bold leading-tight">{song.title}</p>
-            <p className="truncate font-ui text-xs text-muted-foreground">YouTube • 90s cassette</p>
+            <p className="truncate font-hindi text-lg font-bold leading-tight">
+              {activeVideo?.title ?? song.title}
+            </p>
+            <p className="truncate font-ui text-xs text-muted-foreground">
+              {searching ? "YouTube खोज रहे हैं…" : "YouTube • 90s cassette"}
+            </p>
 
             <div className="mt-2 flex items-center gap-2">
               <span className="font-ui text-[10px] tabular-nums text-muted-foreground">
@@ -45,7 +49,7 @@ export function MusicPlayer({
                 value={progress}
                 onChange={(event) => player.seek(Number(event.target.value))}
                 aria-label="गाने की प्रगति"
-                disabled={!ready || duration === 0}
+                disabled={!ready || searching || duration === 0}
                 className="h-1.5 w-full cursor-pointer appearance-none rounded-none bg-[color-mix(in_oklab,var(--ink)_25%,transparent)] accent-[var(--brick)] disabled:cursor-not-allowed"
                 style={{
                   background: `linear-gradient(90deg, var(--brick) ${percentage}%, color-mix(in oklab, var(--ink) 22%, transparent) ${percentage}%)`,
@@ -78,8 +82,18 @@ export function MusicPlayer({
             youtube
           </span>
           <span className="ml-auto text-right font-ui text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {error ?? (ready ? "embedded player" : "loading cassette")}
+            {error ??
+              (searching ? "searching YouTube" : ready ? "embedded player" : "loading cassette")}
           </span>
+          {error && (
+            <button
+              type="button"
+              onClick={player.retry}
+              className="border border-[color-mix(in_oklab,var(--ink)_45%,transparent)] px-2 py-1 font-ui text-[9px] uppercase tracking-wider text-ink"
+            >
+              retry
+            </button>
+          )}
         </div>
       </div>
     </div>

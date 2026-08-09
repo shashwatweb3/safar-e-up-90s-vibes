@@ -1,5 +1,17 @@
 # Safar-e-UP: 90s Vibes
 
+## YouTube music discovery and Vercel setup
+
+Safar-e-UP discovers embeddable YouTube videos from its predefined song searches through a server-side endpoint. Playback uses the official YouTube IFrame Player API; the application never downloads, proxies, or converts YouTube media.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create or select a project.
+2. Enable **YouTube Data API v3** under **APIs & Services → Library**.
+3. Open **APIs & Services → Credentials**, create an **API key**, and restrict it to YouTube Data API v3. Apply appropriate application/IP restrictions for your deployment policy.
+4. In Vercel, open the project’s **Settings → Environment Variables**, add `YOUTUBE_API_KEY`, and apply it to Production, Preview, and Development as needed. Do not prefix it with `VITE_`.
+5. Redeploy after saving the variable. For local development, copy `.env.example` to `.env.local` and add your key; `.env.local` is ignored by Git.
+
+The key is read only by `/api/youtube-discovery` on the server. The browser receives only candidate video IDs, titles, and thumbnail URLs. The current session caches discovery results to minimize YouTube Data API calls.
+
 Build a highly polished interactive nostalgia website called "Safar-e-UP".
 
 IMPORTANT:
@@ -18,7 +30,7 @@ Indian street illustration + old UP Roadways bus + 90s Bollywood nostalgia + vin
 
 DESIGN DIRECTION
 
-----------------
+---
 
 Use the visual aesthetic of the attached reference image as inspiration:
 
@@ -50,7 +62,7 @@ Create an original Uttar Pradesh-specific visual world.
 
 COLOR PALETTE
 
--------------
+---
 
 Primary:
 
@@ -88,7 +100,7 @@ The interface should look slightly aged, tactile and physical.
 
 TYPOGRAPHY
 
-----------
+---
 
 Use expressive Devanagari typography for major Hindi headings.
 
@@ -110,7 +122,7 @@ The Hindi typography should feel like old painted Indian signboards, not like a 
 
 PAGE 1: BUS STOP
 
-----------------
+---
 
 The entire first viewport should feel like the user is physically standing at a small-town Uttar Pradesh bus stop.
 
@@ -192,7 +204,7 @@ Do NOT overcrowd the screen with navigation.
 
 PAGE TRANSITION
 
----------------
+---
 
 When the user clicks "बस में चढ़ें":
 
@@ -218,7 +230,7 @@ The transition should feel like the user actually boarded the bus.
 
 PAGE 2: INSIDE THE BUS
 
-----------------------
+---
 
 Create a full-screen illustrated interior of an old Uttar Pradesh public bus.
 
@@ -282,7 +294,7 @@ Keep these subtle.
 
 CONDUCTOR INTERACTION
 
----------------------
+---
 
 Add a small conductor interaction.
 
@@ -326,7 +338,7 @@ Animate the ticket appearing from the conductor's hand.
 
 MUSIC EXPERIENCE
 
-----------------
+---
 
 After the user enters the bus, introduce the music experience.
 
@@ -374,7 +386,7 @@ Clearly structure the code so real legal audio/embed URLs can be added later.
 
 MUSIC PLAYER UI
 
----------------
+---
 
 Create a beautiful vintage player at the bottom of the screen.
 
@@ -416,7 +428,7 @@ Do NOT make it look like a modern Spotify clone.
 
 PLAYLIST
 
---------
+---
 
 When the user clicks the playlist button, open a physical-looking panel resembling a cassette booklet / old music collection.
 
@@ -442,7 +454,7 @@ The currently playing song should be visually highlighted.
 
 INTERACTIONS
 
-------------
+---
 
 Make the entire bus interactive.
 
@@ -482,7 +494,7 @@ Add subtle micro-interactions throughout.
 
 SCROLLING
 
----------
+---
 
 Prefer a full-screen cinematic experience instead of a traditional scrolling website.
 
@@ -496,7 +508,7 @@ The experience should work especially well on desktop.
 
 RESPONSIVE DESIGN
 
------------------
+---
 
 Desktop should be the primary experience.
 
@@ -516,7 +528,7 @@ On mobile:
 
 ANIMATION
 
----------
+---
 
 Use smooth, subtle animations.
 
@@ -550,7 +562,7 @@ The animation should feel cinematic and nostalgic.
 
 TEXTURE
 
--------
+---
 
 Add a subtle film grain / paper texture overlay across the entire website.
 
@@ -570,7 +582,7 @@ Do not make the website look dirty or low quality.
 
 UI PHILOSOPHY
 
--------------
+---
 
 The UI should feel like objects inside the world rather than UI placed on top of a website.
 
@@ -590,7 +602,7 @@ Avoid traditional navbar/cards/dashboard layouts.
 
 TECHNICAL
 
----------
+---
 
 Build this as a polished React + TypeScript + Tailwind application.
 
@@ -628,7 +640,7 @@ Make the initial experience fully functional, not just a static mockup.
 
 IMPORTANT FINAL FEEL
 
---------------------
+---
 
 When someone opens the website, they should immediately think:
 

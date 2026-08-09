@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { playlists } from "@/lib/playlists";
+import { playlists, type DiscoveredVideo } from "@/lib/playlists";
 
 type YouTubePlayerState = -1 | 0 | 1 | 2 | 3 | 5;
 
@@ -17,7 +17,6 @@ type YouTubeApi = {
   Player: new (
     element: HTMLElement,
     options: {
-      videoId: string;
       playerVars?: Record<string, number>;
       events: {
         onReady: (event: { target: YouTubePlayer }) => void;
@@ -41,7 +40,6 @@ function loadYouTubeApi(): Promise<YouTubeApi> {
   if (typeof window === "undefined") {
     return Promise.reject(new Error("The YouTube player can only be loaded in a browser."));
   }
-
   if (window.YT?.Player) return Promise.resolve(window.YT);
   if (apiPromise) return apiPromise;
 
@@ -63,17 +61,26 @@ function loadYouTubeApi(): Promise<YouTubeApi> {
 }
 
 function playerErrorMessage(code: number): string {
-  if (code === 2) return "This song has an invalid YouTube video ID.";
-  if (code === 5) return "This song cannot be played in the embedded player.";
-  if (code === 100) return "This YouTube video is unavailable.";
-  if (code === 101 || code === 150) return "The video owner does not allow embedding this song.";
-  return "This song could not be played. Try another track.";
+  if (code === 2) return "This YouTube result has an invalid video ID.";
+  if (code === 5) return "This YouTube result cannot play in the embedded player.";
+  if (code === 100) return "This YouTube result is unavailable.";
+  if (code === 101 || code === 150) return "This YouTube result does not allow embedding.";
+  return "This YouTube result could not be played.";
 }
 
-/**
- * Controls the official YouTube IFrame Player API while leaving the visual
- * player entirely in Safar-e-UP's custom cassette UI.
- */
+async function discoverVideos(songId: string, signal: AbortSignal): Promise<DiscoveredVideo[]> {
+  const response = await fetch(`/api/youtube-discovery?song=${encodeURIComponent(songId)}`, {
+    signal,
+  });
+  const payload = (await response.json().catch(() => null)) as {
+    candidates?: DiscoveredVideo[];
+    error?: string;
+  } | null;
+  if (!response.ok) throw new Error(payload?.error ?? "Could not find a YouTube result.");
+  return payload?.candidates ?? [];
+}
+
+/** Controls official YouTube playback while preserving Safar-e-UP's custom UI. */
 export function usePlayer(enabled: boolean) {
   const [listIndex, setListIndex] = useState(0);
   const [songIndex, setSongIndex] = useState(0);
@@ -81,41 +88,94 @@ export function usePlayer(enabled: boolean) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ready, setReady] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeVideo, setActiveVideo] = useState<DiscoveredVideo | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const playerElementRef = useRef<HTMLDivElement | null>(null);
   const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
+  const sessionCacheRef = useRef(new Map<string, DiscoveredVideo[]>());
+  const candidatesRef = useRef<DiscoveredVideo[]>([]);
+  const candidateIndexRef = useRef(0);
 
   const list = playlists[listIndex]!;
   const song = list.songs[songIndex]!;
-  const songRef = useRef(song);
-
-  songRef.current = song;
 
   const next = useCallback(() => {
     setSongIndex((index) => (index + 1) % list.songs.length);
-    setProgress(0);
   }, [list.songs.length]);
 
   const prev = useCallback(() => {
     setSongIndex((index) => (index - 1 + list.songs.length) % list.songs.length);
-    setProgress(0);
   }, [list.songs.length]);
 
   const select = useCallback((nextListIndex: number, nextSongIndex: number) => {
     setListIndex(nextListIndex);
     setSongIndex(nextSongIndex);
-    setProgress(0);
+  }, []);
+
+  const tryNextCandidate = useCallback(() => {
+    const nextCandidate = candidatesRef.current[candidateIndexRef.current + 1];
+    if (!nextCandidate) {
+      setError("No embeddable YouTube result could be played. Try again later.");
+      setPlaying(false);
+      return;
+    }
+    candidateIndexRef.current += 1;
+    setError(null);
+    setActiveVideo(nextCandidate);
   }, []);
 
   useEffect(() => {
-    if (!enabled || !playerElementRef.current) return;
+    if (!enabled) return;
+    const controller = new AbortController();
+    const cachedVideos = sessionCacheRef.current.get(song.id);
 
+    setActiveVideo(null);
+    setProgress(0);
+    setDuration(0);
+    setError(null);
+
+    if (cachedVideos) {
+      candidatesRef.current = cachedVideos;
+      candidateIndexRef.current = 0;
+      setActiveVideo(cachedVideos[0] ?? null);
+      if (!cachedVideos[0]) setError("No embeddable YouTube result was found for this song.");
+      return () => controller.abort();
+    }
+
+    setSearching(true);
+    void discoverVideos(song.id, controller.signal)
+      .then((videos) => {
+        if (controller.signal.aborted) return;
+        sessionCacheRef.current.set(song.id, videos);
+        candidatesRef.current = videos;
+        candidateIndexRef.current = 0;
+        if (videos[0]) setActiveVideo(videos[0]);
+        else setError("No embeddable YouTube result was found for this song.");
+      })
+      .catch((searchError: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(
+            searchError instanceof Error ? searchError.message : "Could not search YouTube.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setSearching(false);
+      });
+
+    return () => controller.abort();
+  }, [enabled, retryCount, song.id]);
+
+  useEffect(() => {
+    if (!enabled || !playerElementRef.current) return;
     let cancelled = false;
+
     void loadYouTubeApi()
       .then((YT) => {
         if (cancelled || !playerElementRef.current) return;
         youtubePlayerRef.current = new YT.Player(playerElementRef.current, {
-          videoId: songRef.current.videoId,
           playerVars: {
             autoplay: 0,
             controls: 0,
@@ -130,7 +190,6 @@ export function usePlayer(enabled: boolean) {
               if (cancelled) return;
               youtubePlayerRef.current = target;
               setReady(true);
-              target.playVideo();
             },
             onStateChange: ({ data }) => {
               if (cancelled) return;
@@ -139,8 +198,8 @@ export function usePlayer(enabled: boolean) {
             },
             onError: ({ data }) => {
               if (cancelled) return;
-              setError(playerErrorMessage(data));
-              setPlaying(false);
+              setError(`${playerErrorMessage(data)} Trying another result…`);
+              tryNextCandidate();
             },
           },
         });
@@ -155,18 +214,18 @@ export function usePlayer(enabled: boolean) {
       cancelled = true;
       youtubePlayerRef.current?.destroy();
       youtubePlayerRef.current = null;
+      setReady(false);
     };
-  }, [enabled, next]);
+  }, [enabled, next, tryNextCandidate]);
 
   useEffect(() => {
     const player = youtubePlayerRef.current;
-    if (!ready || !player) return;
-    setError(null);
-    setDuration(0);
-    setProgress(0);
-    player.loadVideoById(song.videoId);
+    if (!ready || !activeVideo || !player) return;
+    player.loadVideoById(activeVideo.videoId);
+    // The player is initialized only after the user boards. If a browser still
+    // blocks delayed autoplay, the visible custom Play control remains available.
     player.playVideo();
-  }, [listIndex, ready, song.videoId, songIndex]);
+  }, [activeVideo, ready]);
 
   useEffect(() => {
     if (!playing) return;
@@ -199,8 +258,16 @@ export function usePlayer(enabled: boolean) {
     setProgress(seconds);
   }, []);
 
+  const retry = useCallback(() => {
+    sessionCacheRef.current.delete(song.id);
+    candidatesRef.current = [];
+    candidateIndexRef.current = 0;
+    setRetryCount((count) => count + 1);
+  }, [song.id]);
+
   return useMemo(
     () => ({
+      activeVideo,
       duration,
       error,
       list,
@@ -213,6 +280,8 @@ export function usePlayer(enabled: boolean) {
       prev,
       progress,
       ready,
+      retry,
+      searching,
       seek,
       select,
       song,
@@ -220,6 +289,7 @@ export function usePlayer(enabled: boolean) {
       toggle,
     }),
     [
+      activeVideo,
       duration,
       error,
       list,
@@ -231,6 +301,8 @@ export function usePlayer(enabled: boolean) {
       prev,
       progress,
       ready,
+      retry,
+      searching,
       seek,
       select,
       song,
