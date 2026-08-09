@@ -17,8 +17,8 @@ export function CoverStage({
     <div
       className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className ?? ""}`}
       style={{
-        width: "max(100vw, 176.5dvh)",
-        aspectRatio: "1920 / 1088",
+        width: "max(100vw, calc(100dvh * 1920 / 1088))",
+        height: "max(100dvh, calc(100vw * 1088 / 1920))",
         ...style,
       }}
     >
