@@ -27,9 +27,9 @@ export function MusicPlayer({
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-50 flex justify-center p-3 sm:p-5">
       <div className="panel-paper w-full max-w-3xl rotate-[-0.25deg] border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-5">
-        <div className="flex flex-nowrap items-center gap-x-3 gap-y-2.5 sm:items-center sm:gap-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 sm:gap-4">
           {/* The official YouTube embed is framed as the cassette's tiny screen. */}
-          <div className="relative hidden h-14 w-[4.5rem] shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] min-[340px]:block sm:h-16 sm:w-28">
+          <div className="relative hidden h-14 w-[4.5rem] shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] min-[390px]:block sm:h-16 sm:w-28">
             <div ref={player.playerElementRef} className="h-full w-full" />
             {(!ready || searching) && !error && (
               <div className="absolute inset-0 grid place-items-center bg-[var(--brick)] font-ui text-[9px] uppercase tracking-widest text-cream">
@@ -72,7 +72,7 @@ export function MusicPlayer({
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center justify-end gap-1.5">
+          <div className="flex w-full shrink-0 items-center justify-center gap-2 min-[390px]:w-auto min-[390px]:justify-end min-[390px]:gap-1.5">
             <Key onClick={player.prev} label="पिछला गाना">
               ◀◀
             </Key>
