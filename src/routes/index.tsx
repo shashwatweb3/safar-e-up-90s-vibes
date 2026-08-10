@@ -12,6 +12,7 @@ import { getPassengerCount } from "@/lib/passengerCount";
 
 export const Route = createFileRoute("/")({
   head: () => ({
+    links: [{ rel: "canonical", href: "https://safar-e-up.vercel.app/" }],
     meta: [
       { title: "सफ़र-ए-UP — एक सफ़र, कुछ पुराने गाने" },
       {
