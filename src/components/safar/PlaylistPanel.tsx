@@ -85,7 +85,9 @@ export function PlaylistPanel({
                     <span className="w-6 font-ui text-[11px] tabular-nums text-muted-foreground">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className={`min-w-0 font-hindi text-sm sm:text-base ${active ? "font-bold" : ""}`}>
+                    <span
+                      className={`min-w-0 font-hindi text-sm sm:text-base ${active ? "font-bold" : ""}`}
+                    >
                       {song.title}
                     </span>
                     <span className="ml-auto hidden shrink-0 font-ui text-[11px] text-muted-foreground sm:inline">
