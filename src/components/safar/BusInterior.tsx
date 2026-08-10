@@ -58,7 +58,7 @@ export function BusInterior({
         key={mobile ? "m" : "d"}
         layout="center"
         mobileAlign="center"
-        aspect={mobile ? 1024 / 1792 : undefined}
+        {...(mobile ? { aspect: 1024 / 1792 } : {})}
         transform={(mobile) => `scale(${entering ? 1.28 : mobile ? 1 : 1.02})`}
         className="transition-transform duration-[1200ms] ease-out"
       >
@@ -91,7 +91,7 @@ export function BusInterior({
 
         <Conductor
           open={conductorOpen}
-          hotspotClassName={mobile ? "right-0 top-[19%] h-[62%] w-[26%]" : undefined}
+          {...(mobile ? { hotspotClassName: "right-0 top-[19%] h-[62%] w-[26%]" } : {})}
           onToggle={() => setConductorOpen((o) => !o)}
           onSelect={(i) => {
             setTicket(i);
