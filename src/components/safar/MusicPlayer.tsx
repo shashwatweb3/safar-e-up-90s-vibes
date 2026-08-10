@@ -139,8 +139,8 @@ function Key({
       aria-label={label}
       className={`border-2 border-[color-mix(in_oklab,var(--ink)_55%,transparent)] bg-[color-mix(in_oklab,var(--mustard)_70%,var(--cream))] font-ui text-[11px] leading-none text-ink shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_55%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none ${
         big
-          ? "h-12 w-12 text-sm sm:h-11 sm:w-11 sm:pointer-coarse:h-12 sm:pointer-coarse:w-12"
-          : "h-11 w-11 sm:h-9 sm:w-9 sm:pointer-coarse:h-11 sm:pointer-coarse:w-11"
+          ? "h-11 w-11 text-sm min-[390px]:h-10 min-[390px]:w-10 sm:h-11 sm:w-11 sm:pointer-coarse:h-12 sm:pointer-coarse:w-12"
+          : "h-10 w-10 min-[390px]:h-9 min-[390px]:w-9 sm:h-9 sm:w-9 sm:pointer-coarse:h-11 sm:pointer-coarse:w-11"
       }`}
     >
       {children}
