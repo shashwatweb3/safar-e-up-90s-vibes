@@ -29,7 +29,7 @@ export function MusicPlayer({
       <div className="panel-paper w-full max-w-3xl rotate-[-0.25deg] border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-5">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 sm:gap-4">
           {/* The official YouTube embed is framed as the cassette's tiny screen. */}
-          <div className="relative hidden h-14 w-[4.5rem] shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] min-[390px]:block sm:h-16 sm:w-28">
+          <div className="relative hidden h-14 w-[4.5rem] shrink-0 overflow-hidden border-2 border-[color-mix(in_oklab,var(--ink)_60%,transparent)] bg-[var(--brick)] min-[420px]:block sm:h-16 sm:w-28">
             <div ref={player.playerElementRef} className="h-full w-full" />
             {(!ready || searching) && !error && (
               <div className="absolute inset-0 grid place-items-center bg-[var(--brick)] font-ui text-[9px] uppercase tracking-widest text-cream">
@@ -72,7 +72,7 @@ export function MusicPlayer({
             </div>
           </div>
 
-          <div className="flex w-full shrink-0 items-center justify-center gap-2 min-[390px]:w-auto min-[390px]:justify-end min-[390px]:gap-1.5">
+          <div className="flex w-full shrink-0 items-center justify-center gap-2 min-[420px]:w-auto min-[420px]:justify-end min-[420px]:gap-1.5">
             <Key onClick={player.prev} label="पिछला गाना">
               ◀◀
             </Key>
@@ -139,8 +139,8 @@ function Key({
       aria-label={label}
       className={`border-2 border-[color-mix(in_oklab,var(--ink)_55%,transparent)] bg-[color-mix(in_oklab,var(--mustard)_70%,var(--cream))] font-ui text-[11px] leading-none text-ink shadow-[0_3px_0_color-mix(in_oklab,var(--ink)_55%,transparent)] transition-transform active:translate-y-[3px] active:shadow-none ${
         big
-          ? "h-11 w-11 text-sm min-[390px]:h-10 min-[390px]:w-10 sm:h-11 sm:w-11 sm:pointer-coarse:h-12 sm:pointer-coarse:w-12"
-          : "h-10 w-10 min-[390px]:h-9 min-[390px]:w-9 sm:h-9 sm:w-9 sm:pointer-coarse:h-11 sm:pointer-coarse:w-11"
+          ? "h-11 w-11 text-sm min-[420px]:h-10 min-[420px]:w-10 sm:h-11 sm:w-11 sm:pointer-coarse:h-12 sm:pointer-coarse:w-12"
+          : "h-10 w-10 min-[420px]:h-9 min-[420px]:w-9 sm:h-9 sm:w-9 sm:pointer-coarse:h-11 sm:pointer-coarse:w-11"
       }`}
     >
       {children}
