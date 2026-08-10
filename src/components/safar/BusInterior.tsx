@@ -56,7 +56,7 @@ export function BusInterior({
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
         key={mobile ? "m" : "d"}
-        layout="center"
+        layout={mobile ? "width-fit" : "center"}
         mobileAlign="center"
         {...(mobile ? { aspect: 1024 / 1792 } : {})}
         transform={(mobile) => `scale(${entering ? 1.28 : mobile ? 1 : 1.02})`}
