@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
-const AR = 1920 / 1088;
+const DEFAULT_AR = 1920 / 1088;
 
 /**
  * Renders a fixed-aspect illustrated stage so that percentage-positioned
@@ -24,6 +24,7 @@ export function CoverStage({
   mobileShift = 0,
   mobileAlign = "center",
   transform,
+  aspect,
 }: {
   children: ReactNode;
   className?: string;
@@ -32,7 +33,9 @@ export function CoverStage({
   mobileShift?: number;
   mobileAlign?: "center" | "left";
   transform?: (mobile: boolean) => string;
+  aspect?: number;
 }) {
+  const AR = aspect ?? DEFAULT_AR;
   const [size, setSize] = useState<{ w: number; h: number; mobile: boolean; vw: number } | null>(
     null,
   );
@@ -60,7 +63,7 @@ export function CoverStage({
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-  }, [layout]);
+  }, [layout, AR]);
 
   const leftAlign = size?.mobile && mobileAlign === "left";
   const tx = leftAlign ? `-${(50 * size.vw) / size.w}%` : "-50%";

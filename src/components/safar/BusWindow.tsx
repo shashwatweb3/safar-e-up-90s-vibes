@@ -7,19 +7,25 @@ export function BusWindow({
   scenery,
   onClick,
   label,
+  className,
+  clipPath,
 }: {
   scenery: Scenery;
   onClick: () => void;
   label: string;
+  className?: string;
+  clipPath?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="खिड़की के बाहर का नज़ारा बदलें"
-      className="group absolute left-0 top-0 h-[81%] w-[22%] cursor-pointer overflow-hidden"
+      className={
+        className ?? "group absolute left-0 top-0 h-[81%] w-[22%] cursor-pointer overflow-hidden"
+      }
       style={{
-        clipPath: "polygon(0% 0%, 94% 0%, 64% 55%, 60% 88%, 0% 100%)",
+        clipPath: clipPath ?? "polygon(0% 0%, 94% 0%, 64% 55%, 60% 88%, 0% 100%)",
       }}
     >
       <div className="absolute inset-0 bg-[var(--dusty)]" />

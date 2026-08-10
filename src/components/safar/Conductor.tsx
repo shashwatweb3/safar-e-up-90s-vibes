@@ -4,10 +4,12 @@ export function Conductor({
   open,
   onToggle,
   onSelect,
+  hotspotClassName,
 }: {
   open: boolean;
   onToggle: () => void;
   onSelect: (index: number) => void;
+  hotspotClassName?: string;
 }) {
   return (
     <>
@@ -15,7 +17,9 @@ export function Conductor({
         type="button"
         onClick={onToggle}
         aria-label="कंडक्टर से बात करें"
-        className="absolute left-[62%] top-[10%] h-[62%] w-[16%] cursor-pointer rounded-full outline-none ring-0 transition-[background] duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_16%,transparent)] focus-visible:bg-[color-mix(in_oklab,var(--mustard)_20%,transparent)]"
+        className={`absolute cursor-pointer rounded-full outline-none ring-0 transition-[background] duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_16%,transparent)] focus-visible:bg-[color-mix(in_oklab,var(--mustard)_20%,transparent)] ${
+          hotspotClassName ?? "left-[62%] top-[10%] h-[62%] w-[16%]"
+        }`}
       />
       <div
         className="pointer-events-none absolute left-[50vw] top-[22%] z-30 -translate-x-1/2 transition-all duration-500 sm:left-[50%] sm:top-[14%] sm:translate-x-0"

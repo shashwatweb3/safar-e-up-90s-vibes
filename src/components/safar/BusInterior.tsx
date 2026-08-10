@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import interior from "@/assets/bus-interior.jpg";
+import interiorMobile from "@/assets/bus-interior-mobile.jpg";
 import { BusWindow, type Scenery } from "./BusWindow";
 import { Conductor } from "./Conductor";
 import { BusTicket } from "./BusTicket";
@@ -25,6 +26,18 @@ export function BusInterior({
   const [conductorOpen, setConductorOpen] = useState(false);
   const [ticket, setTicket] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    const measure = () => setMobile(window.innerWidth < 640);
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -42,8 +55,10 @@ export function BusInterior({
   return (
     <div className="absolute inset-0 overflow-hidden">
       <CoverStage
-        layout="center"
-        mobileAlign="left"
+        key={mobile ? "m" : "d"}
+        layout={mobile ? "width-fit" : "center"}
+        mobileAlign="center"
+        {...(mobile ? { aspect: 1024 / 1792 } : {})}
         transform={(mobile) => `scale(${entering ? 1.28 : mobile ? 1 : 1.02})`}
         className="transition-transform duration-[1200ms] ease-out"
       >
@@ -52,7 +67,7 @@ export function BusInterior({
           aria-label="Illustrated interior of an old Uttar Pradesh public bus with worn seats, hanging handles and a conductor"
           className="animate-rumble absolute inset-0"
           style={{
-            backgroundImage: `url(${interior})`,
+            backgroundImage: `url(${mobile ? interiorMobile : interior})`,
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
           }}
@@ -61,6 +76,13 @@ export function BusInterior({
         <BusWindow
           scenery={scenery}
           label={sceneryLabels[scenery]}
+          {...(mobile
+            ? {
+                className:
+                  "group absolute left-0 top-[6%] h-[48%] w-[27%] cursor-pointer overflow-hidden",
+                clipPath: "polygon(0% 4%, 100% 0%, 100% 92%, 0% 100%)",
+              }
+            : {})}
           onClick={() => {
             setScenery((s) => (s === "fields" ? "town" : "fields"));
             setToast(scenery === "fields" ? "कानपुर रोड आ गया।" : "अब खेत ही खेत।");
@@ -69,6 +91,7 @@ export function BusInterior({
 
         <Conductor
           open={conductorOpen}
+          {...(mobile ? { hotspotClassName: "right-0 top-[19%] h-[62%] w-[26%]" } : {})}
           onToggle={() => setConductorOpen((o) => !o)}
           onSelect={(i) => {
             setTicket(i);
@@ -83,7 +106,11 @@ export function BusInterior({
           type="button"
           aria-label="सीट"
           onClick={() => setToast("यही वाली सीट ठीक है।")}
-          className="absolute bottom-[18%] left-[26%] h-[26%] w-[34%] cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)] max-sm:h-[30%] max-sm:w-[42%]"
+          className={`absolute cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)] ${
+            mobile
+              ? "bottom-[22%] left-[14%] h-[18%] w-[56%]"
+              : "bottom-[18%] left-[26%] h-[26%] w-[34%]"
+          }`}
         />
       </CoverStage>
 
