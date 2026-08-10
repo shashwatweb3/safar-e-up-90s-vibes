@@ -64,6 +64,36 @@ export const playlists: Playlist[] = [
         videoId: "RlSRxyxFwXI",
         searchQuery: "Aankhon Se Tune Kya Kehna Hai",
       },
+      {
+        id: "mujhse-mohabbat",
+        title: "Mujhse Mohabbat Ka Izhaar Karta",
+        videoId: "asVkFSVdJPo",
+        searchQuery: "Mujhse Mohabbat Ka Izhaar Karta",
+      },
+      {
+        id: "dil-laga-liya",
+        title: "Dil Laga Liya Maine Tumse Pyaar Karke",
+        videoId: "6qBdQzPnw4E",
+        searchQuery: "Dil Laga Liya Maine Tumse Pyaar Karke",
+      },
+      {
+        id: "chand-ke-paar",
+        title: "Chand Ke Paar Chalo",
+        videoId: "ZBRmHLVyw28",
+        searchQuery: "Chand Ke Paar Chalo",
+      },
+      {
+        id: "chand-sifarish",
+        title: "Chand Sifarish",
+        videoId: "zWEOx7TSM6I",
+        searchQuery: "Chand Sifarish",
+      },
+      {
+        id: "main-agar-kahoon",
+        title: "Main Agar Kahoon",
+        videoId: "DAYszemgPxc",
+        searchQuery: "Main Agar Kahoon",
+      },
     ],
   },
 ];
