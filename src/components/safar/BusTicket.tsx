@@ -8,9 +8,9 @@ export function BusTicket({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute left-[50vw] top-[16%] z-40 -translate-x-1/2 sm:left-auto sm:right-[6%] sm:translate-x-0 sm:block">
+    <div className="absolute left-[50vw] top-[22%] z-40 -translate-x-1/2 sm:left-auto sm:right-[6%] sm:top-[16%] sm:translate-x-0 sm:block">
       <div className="animate-ticket">
-        <div className="panel-paper relative w-[min(300px,calc(100vw-2rem))] rotate-[-1.5deg] px-6 py-5 [clip-path:polygon(0_0,100%_0,100%_92%,96%_100%,4%_96%,0_88%)]">
+        <div className="panel-paper relative w-[min(300px,calc(100vw-2rem))] rotate-[-1.5deg] px-5 py-4 [clip-path:polygon(0_0,100%_0,100%_92%,96%_100%,4%_96%,0_88%)] sm:px-6 sm:py-5">
           <div className="border-b border-dashed border-[color-mix(in_oklab,var(--ink)_35%,transparent)] pb-2 text-center">
             <p className="font-hindi text-sm font-bold tracking-wide">उत्तर प्रदेश परिवहन</p>
             <p className="font-ui text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
