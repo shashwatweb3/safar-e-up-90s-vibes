@@ -107,7 +107,9 @@ export function BusInterior({
           aria-label="सीट"
           onClick={() => setToast("यही वाली सीट ठीक है।")}
           className={`absolute cursor-pointer transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--mustard)_12%,transparent)] ${
-            mobile ? "bottom-[22%] left-[14%] h-[18%] w-[56%]" : "bottom-[18%] left-[26%] h-[26%] w-[34%]"
+            mobile
+              ? "bottom-[22%] left-[14%] h-[18%] w-[56%]"
+              : "bottom-[18%] left-[26%] h-[26%] w-[34%]"
           }`}
         />
       </CoverStage>
