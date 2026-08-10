@@ -22,7 +22,7 @@ export function PlaylistPanel({
         className="absolute inset-0 bg-[color-mix(in_oklab,var(--ink)_65%,transparent)]"
       />
       <div
-        className="panel-paper relative grid max-h-[78vh] w-full max-w-4xl grid-cols-1 gap-0 overflow-hidden border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] transition-transform duration-500 sm:grid-cols-[220px_1fr]"
+        className="panel-paper relative grid max-h-[78dvh] w-full max-w-4xl grid-cols-1 gap-0 overflow-y-auto border-[3px] border-[color-mix(in_oklab,var(--ink)_55%,transparent)] transition-transform duration-500 sm:max-h-[78vh] sm:overflow-hidden sm:grid-cols-[220px_1fr]"
         style={{ transform: open ? "rotate(-0.4deg) scale(1)" : "scale(0.94)" }}
       >
         <aside className="border-b-2 border-dashed border-[color-mix(in_oklab,var(--ink)_30%,transparent)] bg-[color-mix(in_oklab,var(--mustard)_28%,var(--cream))] p-4 sm:border-b-0 sm:border-r-2">
@@ -85,10 +85,12 @@ export function PlaylistPanel({
                     <span className="w-6 font-ui text-[11px] tabular-nums text-muted-foreground">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className={`font-hindi text-base ${active ? "font-bold" : ""}`}>
+                    <span
+                      className={`min-w-0 font-hindi text-sm sm:text-base ${active ? "font-bold" : ""}`}
+                    >
                       {song.title}
                     </span>
-                    <span className="ml-auto truncate font-ui text-[11px] text-muted-foreground">
+                    <span className="ml-auto hidden shrink-0 font-ui text-[11px] text-muted-foreground sm:inline">
                       YouTube
                     </span>
                   </button>
