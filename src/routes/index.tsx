@@ -8,6 +8,7 @@ import { PlaylistPanel } from "@/components/safar/PlaylistPanel";
 import { FilmGrainOverlay } from "@/components/safar/FilmGrainOverlay";
 import { usePlayer } from "@/components/safar/usePlayer";
 import { useAmbience } from "@/components/safar/useAmbience";
+import { getPassengerCount } from "@/lib/passengerCount";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -58,6 +59,8 @@ function Safar() {
   }, [player]);
 
   useEffect(() => {
+    // Seed the simulated passenger count once, at the start of this visit.
+    getPassengerCount();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setPlaylistOpen(false);
     };

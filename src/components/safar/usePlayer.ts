@@ -97,6 +97,7 @@ export function usePlayer(interacted: boolean) {
   const needsTapRef = useRef(false);
   const playerElementRef = useRef<HTMLDivElement | null>(null);
   const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
+  const readyRef = useRef(false);
   const candidatesRef = useRef<DiscoveredVideo[]>([]);
   const candidateIndexRef = useRef(0);
 
@@ -164,6 +165,9 @@ export function usePlayer(interacted: boolean) {
             onReady: ({ target }) => {
               if (cancelled) return;
               youtubePlayerRef.current = target;
+              // The player instance only exposes its methods (playVideo etc.)
+              // once it is ready; never call them on the pre-ready skeleton.
+              readyRef.current = true;
               setReady(true);
             },
             onStateChange: ({ data }) => {
@@ -187,6 +191,7 @@ export function usePlayer(interacted: boolean) {
 
     return () => {
       cancelled = true;
+      readyRef.current = false;
       youtubePlayerRef.current?.destroy();
       youtubePlayerRef.current = null;
       setReady(false);
@@ -233,7 +238,11 @@ export function usePlayer(interacted: boolean) {
 
   const play = useCallback(() => {
     setError(null);
-    youtubePlayerRef.current?.playVideo();
+    // Guard: the board click may arrive before the YouTube player finished
+    // initializing, when the instance has no methods yet. In that case the
+    // ready+interacted effect starts playback as soon as the player is ready,
+    // and the needsTap fallback covers browsers that block it.
+    if (readyRef.current) youtubePlayerRef.current?.playVideo();
   }, []);
 
   const pause = useCallback(() => {

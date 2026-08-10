@@ -3,6 +3,7 @@ import interior from "@/assets/bus-interior.jpg";
 import { BusWindow, type Scenery } from "./BusWindow";
 import { Conductor } from "./Conductor";
 import { BusTicket } from "./BusTicket";
+import { PassengerCounter } from "./PassengerCounter";
 import { destinations } from "@/lib/playlists";
 import { CoverStage } from "./CoverStage";
 
@@ -110,6 +111,8 @@ export function BusInterior({
       >
         📻 रेडियो
       </button>
+
+      <PassengerCounter />
 
       <div
         className="pointer-events-none absolute inset-x-0 top-[42%] z-40 flex justify-center transition-all duration-300"
