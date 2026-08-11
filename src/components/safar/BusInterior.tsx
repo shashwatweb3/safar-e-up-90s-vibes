@@ -6,12 +6,11 @@ import { Conductor } from "./Conductor";
 import { BusTicket } from "./BusTicket";
 import { PassengerCounter } from "./PassengerCounter";
 import { destinations } from "@/lib/playlists";
+import { locationScenes, destinationScene } from "@/lib/locationScenes";
 import { CoverStage } from "./CoverStage";
 
-const sceneryLabels: Record<Scenery, string> = {
-  fields: "उन्नाव के खेत",
-  town: "कानपुर रोड बाज़ार",
-};
+/** Order the bus passes through when nudging the window manually. */
+const route: Scenery[] = ["unnao", "kanpur", "lucknow", "ayodhya"];
 
 export function BusInterior({
   onReturnToStop,
@@ -22,7 +21,7 @@ export function BusInterior({
   onOpenPlaylist: () => void;
   entering: boolean;
 }) {
-  const [scenery, setScenery] = useState<Scenery>("fields");
+  const [scenery, setScenery] = useState<Scenery>("unnao");
   const [conductorOpen, setConductorOpen] = useState(false);
   const [ticket, setTicket] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -75,7 +74,7 @@ export function BusInterior({
 
         <BusWindow
           scenery={scenery}
-          label={sceneryLabels[scenery]}
+          label={locationScenes[scenery].label}
           {...(mobile
             ? {
                 className:
@@ -84,8 +83,9 @@ export function BusInterior({
               }
             : {})}
           onClick={() => {
-            setScenery((s) => (s === "fields" ? "town" : "fields"));
-            setToast(scenery === "fields" ? "कानपुर रोड आ गया।" : "अब खेत ही खेत।");
+            const next = route[(route.indexOf(scenery) + 1) % route.length]!;
+            setScenery(next);
+            setToast(`${locationScenes[next].label} आ गया।`);
           }}
         />
 
@@ -95,6 +95,8 @@ export function BusInterior({
           onToggle={() => setConductorOpen((o) => !o)}
           onSelect={(i) => {
             setTicket(i);
+            const next = destinationScene[destinations[i]!.en];
+            if (next) setScenery(next);
             setConductorOpen(false);
           }}
         />
