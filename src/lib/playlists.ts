@@ -48,12 +48,6 @@ export const playlists: Playlist[] = [
         searchQuery: "Tujhe Dekha To Dilwale Dulhania Le Jayenge",
       },
       {
-        id: "ek-ladki-ko-dekha",
-        title: "Ek Ladki Ko Dekha",
-        videoId: "htMvfOfixuM",
-        searchQuery: "Ek Ladki Ko Dekha To Aisa Laga",
-      },
-      {
         id: "do-dil-mil-rahe-hain",
         title: "Do Dil Mil Rahe Hain",
         searchQuery: "Do Dil Mil Rahe Hain Pardes",
