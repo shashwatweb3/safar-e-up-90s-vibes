@@ -20,6 +20,8 @@ export type SceneLayer = {
   height: string;
   /** Background sizing, e.g. "auto 130%" or "220px 100%". */
   size: string;
+  /** Tile width in px; the scroll keyframe wraps exactly on it (no jump). */
+  tile?: number;
   position?: string;
   /** Seconds for one tile to scroll past — smaller = closer/faster. */
   speed: number;
@@ -94,7 +96,6 @@ const bazaarShops = svg(
 const streetTraffic = svg(
   `<g fill="#2f5d4a"><rect x="8" y="82" width="40" height="18" rx="4"/><rect x="18" y="72" width="20" height="12" rx="3"/></g>
    <g fill="#2b1d12"><circle cx="18" cy="102" r="6"/><circle cx="40" cy="102" r="6"/></g>
-   <g fill="#c9á"/>
    <g fill="#b5482b"><path d="M120 100 v-16 a10 10 0 0 1 20 0 v16z"/><rect x="118" y="98" width="26" height="6" rx="2"/></g>
    <g fill="#2b1d12"><circle cx="122" cy="106" r="5"/><circle cx="140" cy="106" r="5"/></g>
    <g fill="#3a2a1a"><rect x="186" y="80" width="7" height="20"/><circle cx="189" cy="74" r="5"/></g>
@@ -153,10 +154,10 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     birds: true,
     layers: [
       { image: `url(${fields})`, height: "100%", size: "auto 130%", position: "0 20%", speed: 38, opacity: 0.9 },
-      { image: treeLine, top: "18%", height: "60%", size: "auto 100%", speed: 22, opacity: 0.75 },
-      { image: cropRows, top: "50%", height: "42%", size: "auto 100%", speed: 12 },
-      { image: tractorField, top: "48%", height: "48%", size: "auto 100%", speed: 26, opacity: 0.9 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 5 },
+      { image: treeLine, top: "18%", height: "60%", size: "auto 100%", tile: 480, speed: 22, opacity: 0.75 },
+      { image: cropRows, top: "50%", height: "42%", size: "auto 100%", tile: 480, speed: 12 },
+      { image: tractorField, top: "48%", height: "48%", size: "auto 100%", tile: 480, speed: 26, opacity: 0.9 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 5 },
     ],
   },
   kanpur: {
@@ -165,9 +166,9 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     sky: "linear-gradient(180deg, #dcc79c 0%, #e9d7ae 50%, #c2b189 100%)",
     layers: [
       { image: `url(${town})`, height: "100%", size: "auto 130%", position: "0 20%", speed: 34, opacity: 0.9 },
-      { image: bazaarShops, top: "8%", height: "72%", size: "auto 100%", speed: 18, opacity: 0.9 },
-      { image: streetTraffic, top: "46%", height: "48%", size: "auto 100%", speed: 8 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 4 },
+      { image: bazaarShops, top: "8%", height: "72%", size: "auto 100%", tile: 480, speed: 18, opacity: 0.9 },
+      { image: streetTraffic, top: "46%", height: "48%", size: "auto 100%", tile: 480, speed: 8 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 4 },
     ],
   },
   lucknow: {
@@ -176,10 +177,10 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     sky: "linear-gradient(180deg, #e3cfa2 0%, #f1e0b8 55%, #c8b68c 100%)",
     birds: true,
     layers: [
-      { image: cityDomes, top: "6%", height: "70%", size: "auto 100%", speed: 30, opacity: 0.85 },
-      { image: bazaarShops, top: "34%", height: "50%", size: "auto 100%", speed: 16, opacity: 0.8 },
-      { image: streetTraffic, top: "48%", height: "46%", size: "auto 100%", speed: 8 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 4 },
+      { image: cityDomes, top: "6%", height: "70%", size: "auto 100%", tile: 480, speed: 30, opacity: 0.85 },
+      { image: bazaarShops, top: "34%", height: "50%", size: "auto 100%", tile: 480, speed: 16, opacity: 0.8 },
+      { image: streetTraffic, top: "48%", height: "46%", size: "auto 100%", tile: 480, speed: 8 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 4 },
     ],
   },
   ayodhya: {
@@ -188,10 +189,10 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     sky: "linear-gradient(180deg, #f0cf94 0%, #f6e2b6 50%, #cdb387 100%)",
     birds: true,
     layers: [
-      { image: templeSpires, top: "8%", height: "70%", size: "auto 100%", speed: 28, opacity: 0.9 },
-      { image: bazaarShops, top: "40%", height: "46%", size: "auto 100%", speed: 15, opacity: 0.75 },
-      { image: streetTraffic, top: "50%", height: "44%", size: "auto 100%", speed: 9 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 4 },
+      { image: templeSpires, top: "8%", height: "70%", size: "auto 100%", tile: 480, speed: 28, opacity: 0.9 },
+      { image: bazaarShops, top: "40%", height: "46%", size: "auto 100%", tile: 480, speed: 15, opacity: 0.75 },
+      { image: streetTraffic, top: "50%", height: "44%", size: "auto 100%", tile: 480, speed: 9 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 4 },
     ],
   },
   varanasi: {
@@ -200,10 +201,10 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     sky: "linear-gradient(180deg, #e8c286 0%, #f3ddac 55%, #c4ad80 100%)",
     birds: true,
     layers: [
-      { image: ghatSteps, top: "10%", height: "70%", size: "auto 100%", speed: 26, opacity: 0.9 },
-      { image: bazaarShops, top: "42%", height: "44%", size: "auto 100%", speed: 14, opacity: 0.7 },
-      { image: streetTraffic, top: "50%", height: "44%", size: "auto 100%", speed: 9 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 4 },
+      { image: ghatSteps, top: "10%", height: "70%", size: "auto 100%", tile: 480, speed: 26, opacity: 0.9 },
+      { image: bazaarShops, top: "42%", height: "44%", size: "auto 100%", tile: 480, speed: 14, opacity: 0.7 },
+      { image: streetTraffic, top: "50%", height: "44%", size: "auto 100%", tile: 480, speed: 9 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 4 },
     ],
   },
   gorakhpur: {
@@ -212,10 +213,10 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     sky: "linear-gradient(180deg, #e2cb92 0%, #eeddb0 50%, #c6b384 100%)",
     birds: true,
     layers: [
-      { image: treeLine, top: "14%", height: "62%", size: "auto 100%", speed: 24, opacity: 0.8 },
-      { image: templeSpires, top: "20%", height: "56%", size: "auto 100%", speed: 30, opacity: 0.5 },
-      { image: cropRows, top: "52%", height: "40%", size: "auto 100%", speed: 12, opacity: 0.9 },
-      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", speed: 5 },
+      { image: treeLine, top: "14%", height: "62%", size: "auto 100%", tile: 480, speed: 24, opacity: 0.8 },
+      { image: templeSpires, top: "20%", height: "56%", size: "auto 100%", tile: 480, speed: 30, opacity: 0.5 },
+      { image: cropRows, top: "52%", height: "40%", size: "auto 100%", tile: 480, speed: 12, opacity: 0.9 },
+      { image: roadEdge, top: "78%", height: "22%", size: "auto 100%", tile: 480, speed: 5 },
     ],
   },
 };
