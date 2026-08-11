@@ -226,7 +226,7 @@ export const destinationScene: Record<string, LocationId> = {
   LUCKNOW: "lucknow",
   KANPUR: "kanpur",
   VARANASI: "varanasi",
-  PRAYAGRAJ: "unnao",
+  PRAYAGRAJ: "varanasi",
   GORAKHPUR: "gorakhpur",
   AYODHYA: "ayodhya",
 };
