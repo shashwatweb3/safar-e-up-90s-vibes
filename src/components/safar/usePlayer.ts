@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { playlists, type DiscoveredVideo } from "@/lib/playlists";
+import { getPlaylistEntries } from "@/lib/playlist-server";
 import { getCachedCandidates } from "@/lib/youtube-cache";
 
 type YouTubePlayerState = -1 | 0 | 1 | 2 | 3 | 5;
@@ -9,13 +10,9 @@ type YouTubePlayer = {
   getCurrentTime: () => number;
   getDuration: () => number;
   getPlayerState: () => YouTubePlayerState;
-  getVideoData: () => { title: string; video_id: string };
   loadVideoById: (videoId: string) => void;
-  loadPlaylist: (playlistId: string, index?: number, startSeconds?: number) => void;
-  nextVideo: () => void;
   pauseVideo: () => void;
   playVideo: () => void;
-  previousVideo: () => void;
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
 };
 
@@ -108,38 +105,35 @@ export function usePlayer(interacted: boolean) {
 
   const list = playlists[listIndex]!;
   // A playlist-backed list (e.g. "90s Radio") has no fixed songs; the current
-  // video is served by the YouTube playlist itself.
+  // video is one of the playlist's entries fetched from YouTube.
   const song = list.songs[songIndex];
   const isRadio = Boolean(list.playlistId);
   const isRadioRef = useRef(isRadio);
-  const loadedPlaylistRef = useRef<string | null>(null);
-
   useEffect(() => {
     isRadioRef.current = isRadio;
   }, [isRadio]);
+  const radioEntriesRef = useRef<DiscoveredVideo[]>([]);
+  const radioLoadedRef = useRef<string | null>(null);
+  // Guards against skipping through the whole playlist when every entry
+  // errors; reset whenever a video actually starts playing.
+  const radioSkipGuardRef = useRef(0);
 
-  const songsLengthRef = useRef(list.songs.length);
+  const radioLengthRef = useRef(0);
   useEffect(() => {
-    songsLengthRef.current = list.songs.length;
-  }, [list.songs.length]);
+    radioLengthRef.current = radioEntriesRef.current.length;
+  }, [isRadio, songIndex, activeVideo?.videoId]);
 
   const next = useCallback(() => {
-    if (isRadioRef.current) {
-      youtubePlayerRef.current?.nextVideo();
-      setProgress(0);
-      return;
-    }
-    setSongIndex((index) => (index + 1) % songsLengthRef.current);
-  }, []);
+    const length = isRadio ? radioLengthRef.current : list.songs.length;
+    if (length === 0) return;
+    setSongIndex((index) => (index + 1) % length);
+  }, [isRadio, list.songs.length]);
 
   const prev = useCallback(() => {
-    if (isRadioRef.current) {
-      youtubePlayerRef.current?.previousVideo();
-      setProgress(0);
-      return;
-    }
-    setSongIndex((index) => (index - 1 + songsLengthRef.current) % songsLengthRef.current);
-  }, []);
+    const length = isRadio ? radioLengthRef.current : list.songs.length;
+    if (length === 0) return;
+    setSongIndex((index) => (index - 1 + length) % length);
+  }, [isRadio, list.songs.length]);
 
   const select = useCallback((nextListIndex: number, nextSongIndex: number) => {
     setListIndex(nextListIndex);
@@ -158,35 +152,43 @@ export function usePlayer(interacted: boolean) {
     setActiveVideo(nextCandidate);
   }, []);
 
-  const syncRadioTitle = useCallback(() => {
-    if (!isRadioRef.current) return;
-    const player = youtubePlayerRef.current;
-    if (!player) return;
-    const videoData = player.getVideoData();
-    if (!videoData || !videoData.video_id) return;
-    setActiveVideo((prev) => {
-      if (
-        prev &&
-        prev.videoId === videoData.video_id &&
-        prev.title === (videoData.title || "90s Radio")
-      ) {
-        return prev;
-      }
-      return {
-        videoId: videoData.video_id,
-        title: videoData.title || "90s Radio",
-        thumbnailUrl: "",
-      };
-    });
-  }, []);
-
   useEffect(() => {
-    // Radio mode: no fixed songs, nothing to look up in the static cache.
-    if (isRadioRef.current) {
-      setSearching(false);
+    // Radio mode: the playlist's entries are fetched from YouTube (server-side
+    // helper, no API key) the first time the list is selected; navigation then
+    // just indexes into the fetched entries.
+    if (isRadio) {
+      const entries = radioEntriesRef.current;
+      if (radioLoadedRef.current !== list.playlistId) {
+        radioLoadedRef.current = list.playlistId ?? null;
+        radioEntriesRef.current = [];
+        setSearching(true);
+        void getPlaylistEntries({ data: list.playlistId! })
+          .then((fetched) => {
+            radioEntriesRef.current = fetched.map((entry) => ({ ...entry, thumbnailUrl: "" }));
+            setSearching(false);
+            setProgress(0);
+            setDuration(0);
+            const entries = radioEntriesRef.current;
+            setError(
+              entries.length > 0 ? null : "This playlist has no playable videos. Try again later.",
+            );
+            setActiveVideo(entries[songIndex % Math.max(entries.length, 1)] ?? null);
+          })
+          .catch((loadError: unknown) => {
+            radioLoadedRef.current = null;
+            setSearching(false);
+            setProgress(0);
+            setDuration(0);
+            setError(
+              loadError instanceof Error ? loadError.message : "The playlist could not be loaded.",
+            );
+          });
+        return;
+      }
+      const entry = entries[songIndex % Math.max(entries.length, 1)];
+      setActiveVideo((prev) => (prev?.videoId === entry?.videoId ? prev : (entry ?? null)));
       setProgress(0);
       setDuration(0);
-      setActiveVideo({ videoId: "", title: list.name, thumbnailUrl: "" });
       return;
     }
     // Static cache lookup — synchronous, no network, no YouTube Data API.
@@ -198,7 +200,7 @@ export function usePlayer(interacted: boolean) {
     setDuration(0);
     setError(cached[0] ? null : "No embeddable YouTube result was found for this song.");
     setSearching(false);
-  }, [retryCount, song?.id, list.name]);
+  }, [isRadio, list.name, list.playlistId, retryCount, song?.id, songIndex]);
 
   useEffect(() => {
     if (!playerElementRef.current) return;
@@ -234,12 +236,21 @@ export function usePlayer(interacted: boolean) {
             onStateChange: ({ data }) => {
               if (cancelled) return;
               setPlaying(data === 1);
-              if (data === 1 && isRadioRef.current) syncRadioTitle();
+              if (data === 1) radioSkipGuardRef.current = 0;
               if (data === 0) next();
             },
             onError: ({ data }) => {
               if (cancelled) return;
               if (isRadioRef.current) {
+                // A real radio skips a broken track instead of stopping.
+                const entries = radioEntriesRef.current;
+                const length = entries.length;
+                if (length > 1 && radioSkipGuardRef.current < length) {
+                  radioSkipGuardRef.current += 1;
+                  setError(null);
+                  setSongIndex((index) => (index + 1) % length);
+                  return;
+                }
                 setError(`${playerErrorMessage(data)} The 90s Radio playlist may be unavailable.`);
                 setPlaying(false);
                 return;
@@ -259,40 +270,22 @@ export function usePlayer(interacted: boolean) {
     return () => {
       cancelled = true;
       readyRef.current = false;
-      loadedPlaylistRef.current = null;
       youtubePlayerRef.current?.destroy();
       youtubePlayerRef.current = null;
       setReady(false);
     };
-  }, [needsTap, next, syncRadioTitle, tryNextCandidate]);
+  }, [needsTap, next, tryNextCandidate]);
 
   useEffect(() => {
     const player = youtubePlayerRef.current;
     if (!ready || !player) return;
-    if (isRadio) {
-      // Mode 2: the official IFrame API loads the playlist directly — no
-      // per-song lookup, no Data API, no copied video IDs. Guarded so radio
-      // title syncs (activeVideo changes) never reload the playlist.
-      if (loadedPlaylistRef.current === list.playlistId) return;
-      loadedPlaylistRef.current = list.playlistId ?? null;
-      setError(null);
-      setProgress(0);
-      setDuration(0);
-      player.loadPlaylist(list.playlistId!, 0, 0);
-      // Playback is triggered by the board click (trusted gesture). If the click
-      // arrived before the player was ready, `interacted` already flipped and we
-      // still start automatically — the needsTap watchdog covers blocked cases.
-      if (interacted && !needsTapRef.current) player.playVideo();
-      return;
-    }
-    loadedPlaylistRef.current = null;
     if (!activeVideo) return;
     player.loadVideoById(activeVideo.videoId);
     // Playback is triggered by the board click (trusted gesture). If the click
     // arrived before the player was ready, `interacted` already flipped and we
     // still start automatically — the needsTap watchdog covers blocked cases.
     if (interacted && !needsTapRef.current) player.playVideo();
-  }, [activeVideo, interacted, isRadio, list.name, list.playlistId, ready, retryCount]);
+  }, [activeVideo, interacted, ready, retryCount]);
 
   // Autoplay watchdog: runs only after the user boarded. If the browser's
   // policy rejected playback, the player sits at unstarted/cued — switch to
@@ -316,12 +309,11 @@ export function usePlayer(interacted: boolean) {
     const interval = window.setInterval(() => {
       const player = youtubePlayerRef.current;
       if (!player || typeof player.getCurrentTime !== "function") return;
-      if (isRadioRef.current) syncRadioTitle();
       setProgress(player.getCurrentTime());
       setDuration(player.getDuration());
     }, 250);
     return () => window.clearInterval(interval);
-  }, [playing, syncRadioTitle]);
+  }, [playing]);
 
   const play = useCallback(() => {
     setError(null);
@@ -350,7 +342,7 @@ export function usePlayer(interacted: boolean) {
   const retry = useCallback(() => {
     candidatesRef.current = [];
     candidateIndexRef.current = 0;
-    loadedPlaylistRef.current = null;
+    radioLoadedRef.current = null;
     setRetryCount((count) => count + 1);
   }, []);
 
