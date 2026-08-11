@@ -56,7 +56,7 @@ export function PlaylistPanel({
             <div>
               <h3 className="font-display text-3xl text-brick">{player.list.name}</h3>
               <p className="font-ui text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-                {player.list.songs.length} tracks
+                {player.list.playlistId ? "YouTube playlist" : `${player.list.songs.length} tracks`}
               </p>
             </div>
             <button
@@ -68,36 +68,48 @@ export function PlaylistPanel({
             </button>
           </div>
 
-          <ol className="mt-4 flex flex-col">
-            {player.list.songs.map((song, i) => {
-              const active = i === player.songIndex;
-              return (
-                <li key={song.title}>
-                  <button
-                    type="button"
-                    onClick={() => player.select(player.listIndex, i)}
-                    className={`flex w-full items-baseline gap-3 border-b border-dashed border-[color-mix(in_oklab,var(--ink)_25%,transparent)] px-2 py-2 text-left transition-colors ${
-                      active
-                        ? "bg-[color-mix(in_oklab,var(--mustard)_45%,transparent)]"
-                        : "hover:bg-[color-mix(in_oklab,var(--mustard)_22%,transparent)]"
-                    }`}
-                  >
-                    <span className="w-6 font-ui text-[11px] tabular-nums text-muted-foreground">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      className={`min-w-0 font-hindi text-sm sm:text-base ${active ? "font-bold" : ""}`}
+          {player.list.playlistId ? (
+            <div className="mt-4 border-2 border-dashed border-[color-mix(in_oklab,var(--ink)_30%,transparent)] bg-[color-mix(in_oklab,var(--mustard)_22%,transparent)] p-5 text-center">
+              <p className="font-display text-xl text-brick">📻 90s Radio</p>
+              <p className="mt-2 font-hindi text-sm">
+                90s का लाइव सफ़र — यूट्यूब प्लेलिस्ट सीधे बजती है। प्लेयर से ▶ दबाकर शुरू करें।
+              </p>
+              <p className="mt-1 font-ui text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                YouTube IFrame Player • live playlist
+              </p>
+            </div>
+          ) : (
+            <ol className="mt-4 flex flex-col">
+              {player.list.songs.map((song, i) => {
+                const active = i === player.songIndex;
+                return (
+                  <li key={song.title}>
+                    <button
+                      type="button"
+                      onClick={() => player.select(player.listIndex, i)}
+                      className={`flex w-full items-baseline gap-3 border-b border-dashed border-[color-mix(in_oklab,var(--ink)_25%,transparent)] px-2 py-2 text-left transition-colors ${
+                        active
+                          ? "bg-[color-mix(in_oklab,var(--mustard)_45%,transparent)]"
+                          : "hover:bg-[color-mix(in_oklab,var(--mustard)_22%,transparent)]"
+                      }`}
                     >
-                      {song.title}
-                    </span>
-                    <span className="ml-auto hidden shrink-0 font-ui text-[11px] text-muted-foreground sm:inline">
-                      YouTube
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+                      <span className="w-6 font-ui text-[11px] tabular-nums text-muted-foreground">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        className={`min-w-0 font-hindi text-sm sm:text-base ${active ? "font-bold" : ""}`}
+                      >
+                        {song.title}
+                      </span>
+                      <span className="ml-auto hidden shrink-0 font-ui text-[11px] text-muted-foreground sm:inline">
+                        YouTube
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
         </div>
       </div>
     </div>

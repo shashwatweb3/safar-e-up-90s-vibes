@@ -15,6 +15,12 @@ export type Playlist = {
   id: string;
   name: string;
   subtitle: string;
+  /**
+   * Official YouTube playlist (e.g. "90s Radio"). When present the player
+   * loads the playlist directly through the YouTube IFrame API instead of
+   * fixed video IDs; `songs` stays empty.
+   */
+  playlistId?: string | undefined;
   songs: Song[];
 };
 
@@ -89,6 +95,13 @@ export const playlists: Playlist[] = [
         searchQuery: "Main Agar Kahoon",
       },
     ],
+  },
+  {
+    id: "90s-radio",
+    name: "90s Radio",
+    subtitle: "Side B • यूट्यूब प्लेलिस्ट",
+    playlistId: "PLdYswjLefi7wW58ByPuy2oLdUyqBMTaWD",
+    songs: [],
   },
 ];
 

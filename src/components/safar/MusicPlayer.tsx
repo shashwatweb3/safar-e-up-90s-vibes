@@ -21,6 +21,7 @@ export function MusicPlayer({
     searching,
     activeVideo,
     needsTap,
+    isRadio,
   } = player;
   const percentage = duration > 0 ? Math.min(100, (progress / duration) * 100) : 0;
 
@@ -43,10 +44,14 @@ export function MusicPlayer({
               now playing • {list.name}
             </p>
             <p className="line-clamp-2 font-hindi text-base font-bold leading-snug sm:line-clamp-none sm:truncate sm:text-lg sm:leading-tight">
-              {activeVideo?.title ?? song.title}
+              {activeVideo?.title ?? song?.title ?? list.name}
             </p>
             <p className="truncate font-ui text-[11px] text-muted-foreground sm:text-xs">
-              {searching ? "YouTube खोज रहे हैं…" : "YouTube • 90s cassette"}
+              {searching
+                ? "YouTube खोज रहे हैं…"
+                : isRadio
+                  ? "YouTube Radio • live playlist"
+                  : "YouTube • 90s cassette"}
             </p>
 
             <div className="mt-2 flex items-center gap-2">
