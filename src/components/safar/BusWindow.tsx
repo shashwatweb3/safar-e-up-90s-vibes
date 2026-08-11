@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { WindowScene } from "./WindowScene";
-import { locationScenes, type LocationId } from "@/lib/locationScenes";
+import fields from "@/assets/scenery-fields.jpg";
+import town from "@/assets/scenery-town.jpg";
 
-/** Kept for backwards compatibility with the original two-scenery API. */
-export type Scenery = LocationId;
+export type Scenery = "fields" | "town";
 
 export function BusWindow({
   scenery,
@@ -18,19 +16,6 @@ export function BusWindow({
   className?: string;
   clipPath?: string;
 }) {
-  // Keep the outgoing scene mounted briefly so locations crossfade instead of
-  // snapping, then unmount it to stop its animations.
-  const [scenes, setScenes] = useState<LocationId[]>([scenery]);
-  const prev = useRef(scenery);
-
-  useEffect(() => {
-    if (prev.current === scenery) return;
-    prev.current = scenery;
-    setScenes((s) => [...s.filter((x) => x !== scenery), scenery]);
-    const id = window.setTimeout(() => setScenes([scenery]), 1000);
-    return () => window.clearTimeout(id);
-  }, [scenery]);
-
   return (
     <button
       type="button"
@@ -44,11 +29,28 @@ export function BusWindow({
       }}
     >
       <div className="absolute inset-0 bg-[var(--dusty)]" />
-
-      {scenes.map((id) => (
-        <WindowScene key={id} id={id} active={id === scenery} />
-      ))}
-
+      {/* far layer */}
+      <div
+        className="absolute inset-0 opacity-90"
+        style={{
+          backgroundImage: `url(${scenery === "town" ? town : fields})`,
+          backgroundSize: "auto 130%",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "0 20%",
+          animation: "scenery-far 38s linear infinite",
+        }}
+      />
+      {/* near layer */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-1/2"
+        style={{
+          backgroundImage: `url(${scenery === "town" ? town : fields})`,
+          backgroundSize: "auto 260%",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "0 100%",
+          animation: "scenery-near 11s linear infinite",
+        }}
+      />
       {/* dusty glass + sunlight */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -58,19 +60,11 @@ export function BusWindow({
         }}
       />
       <span className="absolute bottom-[14%] left-2 rounded-[2px] bg-[color-mix(in_oklab,var(--ink)_72%,transparent)] px-2 py-1 font-hindi text-xs text-cream opacity-100 sm:opacity-0 sm:transition-opacity sm:duration-300 sm:group-hover:opacity-100">
-        {label || locationScenes[scenery].label}
+        {label}
       </span>
       <style>{`
-        @keyframes scene-scroll-480 { from { background-position-x: 0px; } to { background-position-x: -480px; } }
-        @keyframes scene-scroll-1920 { from { background-position-x: 0px; } to { background-position-x: -1920px; } }
-        @keyframes scene-bird {
-          from { transform: translate3d(110%, 0, 0); }
-          to { transform: translate3d(-120%, -30%, 0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          @keyframes scene-scroll-480 { from { background-position-x: 0px; } to { background-position-x: 0px; } }
-          @keyframes scene-scroll-1920 { from { background-position-x: 0px; } to { background-position-x: 0px; } }
-        }
+        @keyframes scenery-far { from { background-position-x: 0px; } to { background-position-x: -1920px; } }
+        @keyframes scenery-near { from { background-position-x: 0px; } to { background-position-x: -1920px; } }
       `}</style>
     </button>
   );
