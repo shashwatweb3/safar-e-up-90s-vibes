@@ -6,12 +6,8 @@ import { Conductor } from "./Conductor";
 import { BusTicket } from "./BusTicket";
 import { PassengerCounter } from "./PassengerCounter";
 import { destinations } from "@/lib/playlists";
+import { destinationScene, locationScenes, sceneOrder } from "@/lib/locationScenes";
 import { CoverStage } from "./CoverStage";
-
-const sceneryLabels: Record<Scenery, string> = {
-  fields: "उन्नाव के खेत",
-  town: "कानपुर रोड बाज़ार",
-};
 
 export function BusInterior({
   onReturnToStop,
@@ -22,7 +18,7 @@ export function BusInterior({
   onOpenPlaylist: () => void;
   entering: boolean;
 }) {
-  const [scenery, setScenery] = useState<Scenery>("fields");
+  const [scenery, setScenery] = useState<Scenery>("unnao");
   const [conductorOpen, setConductorOpen] = useState(false);
   const [ticket, setTicket] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -84,8 +80,9 @@ export function BusInterior({
               }
             : {})}
           onClick={() => {
-            setScenery((s) => (s === "fields" ? "town" : "fields"));
-            setToast(scenery === "fields" ? "कानपुर रोड आ गया।" : "अब खेत ही खेत।");
+            const next = sceneOrder[(sceneOrder.indexOf(scenery) + 1) % sceneOrder.length]!;
+            setScenery(next);
+            setToast(`${locationScenes[next].label} आ गया।`);
           }}
         />
 
@@ -96,6 +93,8 @@ export function BusInterior({
           onSelect={(i) => {
             setTicket(i);
             setConductorOpen(false);
+            const next = destinationScene[destinations[i]!.en];
+            if (next) setScenery(next);
           }}
         />
 
