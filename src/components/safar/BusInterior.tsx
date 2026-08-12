@@ -71,7 +71,7 @@ export function BusInterior({
 
         <BusWindow
           scenery={scenery}
-          label={sceneryLabels[scenery]}
+          label={locationScenes[scenery].label}
           {...(mobile
             ? {
                 className:
