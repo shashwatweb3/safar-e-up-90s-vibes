@@ -35,6 +35,13 @@ export const WindowScene = memo(function WindowScene({
             height: l.height,
             opacity: l.opacity ?? 1,
             ...(l.blur ? { filter: `blur(${l.blur}px)` } : {}),
+            ...(l.sway
+              ? {
+                  animation: "scene-wind 3.4s ease-in-out infinite",
+                  animationPlayState: play,
+                  transformOrigin: "bottom center",
+                }
+              : {}),
           }}
         >
           <div
@@ -48,12 +55,6 @@ export const WindowScene = memo(function WindowScene({
               animation: `scene-scroll ${l.speed}s linear infinite`,
               animationPlayState: play,
               willChange: "transform",
-              transformOrigin: "bottom center",
-              ...(l.sway
-                ? {
-                    animation: `scene-scroll ${l.speed}s linear infinite, scene-wind 3.4s ease-in-out infinite`,
-                  }
-                : {}),
             }}
           />
         </div>
@@ -150,8 +151,8 @@ export const WindowScene = memo(function WindowScene({
       <style>{`
         @keyframes scene-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
         @keyframes scene-wind {
-          0%, 100% { transform: translate3d(0,0,0) skewX(0deg); }
-          50% { transform: translate3d(0,0,0) skewX(-1.6deg); }
+          0%, 100% { transform: skewX(0deg); }
+          50% { transform: skewX(-1.4deg); }
         }
         @keyframes scene-bird { from { transform: translate3d(0,0,0); } to { transform: translate3d(760%, -40%, 0); } }
         @keyframes scene-flap { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(0.45); } }
