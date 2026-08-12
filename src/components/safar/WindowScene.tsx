@@ -105,7 +105,7 @@ export const WindowScene = memo(function WindowScene({
               strokeWidth="1.6"
               strokeLinecap="round"
               style={{ animation: `scene-flap 0.9s ease-in-out infinite`, animationPlayState: play }}
-              transform-origin="30 10"
+              style={{ transformOrigin: "30px 10px" }}
             >
               <path d="M4 10c3-4 6-4 9 0 3-4 6-4 9 0" />
               <path d="M30 14c2.4-3.2 4.8-3.2 7.2 0 2.4-3.2 4.8-3.2 7.2 0" />
