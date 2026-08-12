@@ -54,7 +54,15 @@ export const locationScenes: Record<LocationId, LocationScene> = {
     ground: "oklch(0.66 0.09 74)",
     layers: [
       { image: unnaoFar, top: "0%", height: "78%", speed: 62, scale: 2.6, opacity: 0.96 },
-      { image: unnaoFar, top: "26%", height: "62%", speed: 26, scale: 1.5, opacity: 0.95, blur: 0.3 },
+      {
+        image: unnaoFar,
+        top: "26%",
+        height: "62%",
+        speed: 26,
+        scale: 1.5,
+        opacity: 0.95,
+        blur: 0.3,
+      },
       { image: unnaoNear, top: "62%", height: "42%", speed: 6.5, scale: 0.9, sway: true },
     ],
     traffic: traffic("14%", "26%", 7, 3),
